@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bouvet Invaders</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="theme-color" content="#ffffff">
+    </head>
+  <body>
+    <main id="main" class="main">
+      <div id="menu" class="menu">
+        <div class="title">
+          BOUVET INVADERS
+        </div>
+        <div id="results" class="results"></div>
+        <div class="instructions">
+          Shoot as many invaders as possible before the time runs out!
+          <br><br>
+          Left and right arrow keys to move
+          <br>
+          Spacebar to fire
+          <br><br>
+          Press enter to start
+        </div>
+      </div>
+      <div class="stats">
+        <table>
+          <tr>
+            <td>Lives:</td>
+            <td><span id="lifecount"></span></td>
+          </tr>
+        </table>
+        <div>
+          <span id="countdown"></span>
+        </div>
+        <table>
+          <tr>
+            <td>Score:</td>
+            <td><span id="score"></span></td>
+          </tr>
+        </table>
+      </div>
+      <div id="centralMessage" class="central-message"></div>
+      <img id="speaker" class="speaker" src="speaker.png" />
+      <div id="message1" class="message"></div>
+      <div id="message2" class="message"></div>
+      <div id="target" class="target" style="left:240px">
+        <img src="ufo-white.svg" />
+      </div>
+      <div id="gun" class="gun" style="left: 240px;">
+        <!-- <div class="turret"></div> -->
+        <img src="tank-white.svg" />
+        <div class="heatColor"></div>
+        <div id="heat" class="heat"></div>
+      </div>
+    </main>
+  </body>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 13px;
+      background: black;
+      color: white;
+    }
+
+    .main {
+      width: 500px;
+      height: 500px;
+      border: 1px solid white;
+      position: relative;
+      overflow: hidden;
+      margin: auto;
+    }
+
+    .menu {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: black;
+      height: 100%;
+      width: 100%;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .title {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+    }
+
+    .results {
+      display: none;
+      padding: 10px;
+      border: 1px dashed white;
+      margin-bottom: 30px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+    }
+
+    table {
+      border-spacing: 0;
+    }
+
+    td {
+      text-align: left;
+      min-width: 25px;
+      padding: 2px 5px;
+    }
+
+    .target {
+      position: absolute;
+      top: 75px;
+      height: 20px;
+      width: 35px;
+      /* border-radius: 100%;
+      background: white;
+      overflow: hidden; */
+      will-change: left;
+    }
+
+    .target img {
+      height: 100%;
+      width: 100%;
+    }
+
+    .gun {
+      position: absolute;
+      bottom: 0;
+      height: 20px;
+      width: 40px;
+      /* background: white;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px; */
+      will-change: left;
+    }
+
+    .gun img {
+      height: 100%;
+      width: 100%;
+    }
+
+    /* .turret {
+      position: absolute;
+      height: 10px;
+      width: 6px;
+      top: -10px;
+      left: 17px;
+      background: white;
+    } */
+
+    .heatColor {
+      position: absolute;
+      height: 5px;
+      top: 6px;
+      left: 7px;
+      right: 7px;
+      background: linear-gradient(90deg, rgba(0,193,6,1) 0%, rgba(170,171,0,1) 50%, rgba(199,0,0,1) 100%);
+      border-radius: 5px;
+    }
+
+    .heat {
+      position: absolute;
+      height: 5px;
+      top: 6px;
+      right: 7px;
+      width: 26px;
+      background: black;
+    }
+
+    .bullet {
+      position: absolute;
+      height: 3px;
+      width: 3px;
+      background: white;
+      border-radius: 100%;
+    }
+
+    .bomb {
+      position: absolute;
+      height: 13px;
+      width: 13px;
+      border: 1px solid white;
+      background: black;
+      border-radius: 100%;
+    }
+
+    .explosion {
+      position: absolute;
+      transform: scale(0,0);
+      width: 25px;
+      height: 25px;
+      border-radius: 100%;
+      background: white;
+      box-shadow: 0px 0px 15px 0px #333;
+      transition: transform ease 400ms, opacity ease 500ms;
+    }
+
+    .explosion--small {
+      position: absolute;
+      transform: scale(0,0);
+      width: 20px;
+      height: 20px;
+      border-radius: 100%;
+      background: white;
+      box-shadow: 0px 0px 15px 0px #333;
+      transition: transform ease 400ms, opacity ease 500ms;
+    }
+
+    .speaker {
+      width: 100px;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translate(110%, -50%) rotate(-30deg);
+      transition: transform ease-in-out 300ms;
+    }
+
+    .message {
+      opacity: 0;
+      position: absolute;
+      top: 50%;
+      right: 30px;
+      transform: scale(0,0) translate(0%,-50%);
+      transition: transform 300ms;
+      font-size: 18px;
+      text-align: center;
+      min-width: 50px;
+    }
+
+    .central-message {
+      opacity: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 34px;
+    }
+
+    .spawned {
+      animation-name: spawning;
+      animation-duration: 250ms;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes spawning {
+      0%   {opacity: 0.5;}
+      50% {opacity: 1;}
+      100% {opacity: 0.5;}
+    }
+  </style>
+
+  <script>
+    // Global game constants
+    const gameTime = 60; // total s per game
+    const spawnRate = 1000; // ms delay before target respawns
+    const gameUpdateRate = 5; // ms interval for game updates (bullet, target, gun, etc., lower => faster movement)
+    const firingUpdateRate = 100; // ms interval for firing rate (lower => higher firerate)
+    const gunSpeed = 2.5; // px of movement at each update
+    const bulletSpeed = 3; // px of movement at each update
+    const targetSpeed = 2; // px of movement at each update
+    const bombSpeed = 1; // px of movement at each update
+    const targetMoveRandomness = 400; // lower => changes direction more often
+    const targetBombRandomness = 100; // lower => drops bombs more often
+    const scorePerHit = 25; // points for each hit
+    const scorePerAcc = 10; // points for each accuracy %
+    const scorePerLife = 50; // points for each remaining life
+    const gunHeatMax = 1000; // max level of heat
+    const gunHeatAdd = 200; // heat added per shot fired
+    const gunHeatReduce = 5; // heat removed per shot not fired
+
+    // Starting variables
+    let gameActive,
+    gameReadyToStart,
+    countDown,
+    targetDirection, // direction of movement (0=still, 1=left, 2=right)
+    targetPosition, // left position in px
+    targetInvulnerable,
+    gunMovingLeft,
+    gunMovingRight,
+    gunFiring,
+    gunPosition, // left position in px
+    gunHeat,
+    gunDisabled,
+    gunInvulnerable,
+    timeElapsed,
+    timeLastFireUpdate,
+    shotCount,
+    hitCount,
+    bombCount,
+    lifeCount;
+
+    // Html elements
+    const mainEl = document.getElementById("main");
+    const menuEl = document.getElementById("menu");
+    const resultsEl = document.getElementById("results");
+    const lifecountEl = document.getElementById("lifecount");
+    const countdownEl = document.getElementById("countdown");
+    const scoreEl = document.getElementById("score");
+    const gunEl = document.getElementById("gun");
+    const heatEl = document.getElementById("heat");
+    const targetEl = document.getElementById("target");
+    const centralMessageEl = document.getElementById("centralMessage");
+    const speakerEl = document.getElementById("speaker");
+    const message1El = document.getElementById("message1");
+    const message2El = document.getElementById("message2");
+
+    // Functions
+    const resetVariables = () => {
+      gameActive = false;
+      gameReadyToStart = false;
+      countDown = gameTime;
+      targetDirection = 0;
+      targetPosition = 240;
+      targetInvulnerable = false;
+      gunMovingLeft = false;
+      gunMovingRight = false;
+      gunFiring = false;
+      gunPosition = 240;
+      gunHeat = 0;
+      gunDisabled = false;
+      gunInvulnerable = false;
+      timeElapsed = 0;
+      timeLastFireUpdate = 0;
+      shotCount = 0;
+      hitCount = 0;
+      bombCount = 0;
+      lifeCount = 3;
+    };
+
+    const keyboardDownHandler = (event) => {
+      if (gameActive) {
+        switch(event.key) {
+          case "ArrowLeft":
+            // Start moving left
+            gunMovingLeft = true;
+            break;
+          case "ArrowRight":
+            // Start moving right
+            gunMovingRight = true;
+            break;
+          case " ":
+            // Start firing
+            gunFiring = true;
+            break;
+          case "Escape":
+            // Stop the game
+            stopGame();
+            break;
+        }
+      } else if (gameReadyToStart && event.key === "Enter") {
+        // Reset variables and scoreboard
+        resetVariables();
+        lifecountEl.innerText = "|||";
+        countdownEl.innerText = gameTime;
+        scoreEl.innerText = "0";
+        menuEl.style.display = "none";
+
+        // Start game and begin countdown
+        gameActive = true;
+        setTimeout(countdownTimer, 1000);
+
+        // Spawn target and initialize movement
+        spawnTarget(0);
+        moveTarget();
+
+        // Spawn gun and initialize movement and firing
+        spawnGun(0);
+        moveGun();
+        fireGun();
+      }
+    };
+
+    const keyboardUpHandler = (event) => {
+      if (gameActive) {
+        switch(event.key) {
+          case "ArrowLeft":
+            // Stop moving left
+            gunMovingLeft = false;
+            break;
+          case "ArrowRight":
+            // Stop moving right
+            gunMovingRight = false;
+            break;
+          case " ":
+            // Stop firing
+            gunFiring = false;
+            break;
+        }
+      }
+    };
+
+    const countdownTimer = () => {
+      if (gameActive) {
+        countDown --;
+        countdownEl.innerText = countDown;
+
+        if (countDown > 0) {
+          setTimeout(countdownTimer, 1000);
+        } else {
+          stopGame();
+        }
+      }
+    };
+
+    const stopGame = () => {
+      // Stop the game
+      gameActive = false;
+      showMessage(centralMessageEl, "GAME OVER!", "-50%", "-50%", 1 );
+      destroyTarget();
+      destroyGun();
+
+      // Show results and enable next round
+      setTimeout(() => {
+        hideMessage(centralMessageEl);
+        const totalAccuracy = shotCount > 0 ? Math.round((hitCount/shotCount) * 100) : 0;
+        const totalScore = hitCount * scorePerHit;
+        const bonusAccScore = totalAccuracy * scorePerAcc;
+        const bonusLivesScore = lifeCount * scorePerLife;
+        const finalscore = totalScore + bonusAccScore + bonusLivesScore;
+        resultsEl.innerHTML = `<span class="subtitle">GAME OVER!</span><br><br>
+          Shots: ${shotCount}<br>
+          Hits: ${hitCount}<br>
+          Accuracy: ${totalAccuracy}%<br>
+          Lives remaining: ${lifeCount}<br><br>
+          Score: ${totalScore}<br>
+          Accuracy bonus: + ${bonusAccScore}<br>
+          Lives bonus: + ${bonusLivesScore}<br><br>
+          <span class="subtitle">FINAL SCORE: ${finalscore}</span>`;
+        menuEl.style.display = "flex";
+        resultsEl.style.display = "block";
+        gameReadyToStart = true;
+      }, 2000);
+    };
+
+    const moveTarget = () => {
+      if (targetDirection === 1) {
+        targetPosition -= targetSpeed;
+
+        if (targetPosition < 0) {
+          // Change direction if edge of container is reached
+          targetDirection = 2
+        } else {
+          targetEl.style.left = targetPosition + "px";
+        }
+      } else if (targetDirection === 2) {
+        targetPosition += targetSpeed;
+
+        if (targetPosition > 450) {
+          // Change direction if edge of container is reached
+          targetDirection = 1
+        } else {
+          targetEl.style.left = targetPosition + "px";
+        }
+      }
+
+      // Randomly change direction sometimes
+      if (Math.floor(Math.random() * targetMoveRandomness) === 1) {
+        targetDirection = targetDirection === 1 ? 2 : 1;
+      }
+
+      // Randomly drop bombs sometimes
+      if (targetEl.style.display !== "none" && Math.floor(Math.random() * targetBombRandomness) === 1) {
+        bombCount ++;
+
+        // Create bomb element and spawn in at target position
+        const bomb = document.createElement('div');
+        bomb.id = 'bomb-' + bombCount;
+        bomb.classList.add("bomb");
+        bomb.style.top = "100px";
+        bomb.style.left = (targetPosition + 18.5) + "px";
+        mainEl.appendChild(bomb);
+
+        // Start an intersection observer to handle bombs going off screen
+        let options = {
+          root: mainEl,
+          rootMargin: '0px',
+          threshold: 1.0
+        }
+
+        let observer = new IntersectionObserver(missHandler, options);
+        observer.observe(bomb);
+
+        // Start bomb movement
+        bombTravel(bomb);
+      }
+
+      if (gameActive) {
+        setTimeout(moveTarget, gameUpdateRate);
+      }
+    };
+
+    const moveGun = () => {
+      if (gunMovingLeft) {
+        gunPosition -= gunSpeed;
+        if (gunPosition < 0) {
+          gunPosition = 0;
+        }
+        gunEl.style.left = gunPosition + "px";
+      } else if (gunMovingRight) {
+        gunPosition += gunSpeed;
+        if (gunPosition > 460) {
+          gunPosition = 460;
+        }
+        gunEl.style.left = gunPosition + "px";
+      }
+
+      if (gameActive) {
+        setTimeout(moveGun, gameUpdateRate);
+      }
+    };
+
+    const fireGun = () => {
+      timeElapsed += gameUpdateRate;
+
+      if (gunEl.style.display !== "none" && gunFiring && !gunDisabled) {
+        // Regulate fire rate
+        if (timeElapsed >= timeLastFireUpdate + firingUpdateRate) {
+          timeLastFireUpdate = timeElapsed;
+          shotCount++;
+
+          // Update gun heat
+          gunHeat += gunHeatAdd;
+          if (gunHeat > gunHeatMax) gunHeat = gunHeatMax;
+          heatEl.style.width = (26 - Math.ceil((gunHeat / gunHeatMax) * 26)) + "px";
+
+          // Create bullet element and spawn in at gun position
+          const bullet = document.createElement('div');
+          bullet.id = 'bullet-' + shotCount;
+          bullet.classList.add("bullet");
+          bullet.style.bottom = "30px";
+          bullet.style.left = (gunPosition + 18.5) + "px";
+          mainEl.appendChild(bullet);
+
+          // Start an intersection observer to handle bullets going off screen
+          let options = {
+            root: mainEl,
+            rootMargin: '0px',
+            threshold: 1.0
+          };
+
+          let observer = new IntersectionObserver(missHandler, options);
+          observer.observe(bullet);
+
+          // Start bullet movement
+          bulletTravel(bullet);
+
+          // Disable gun if overheated
+          if (gunHeat >= gunHeatMax) {
+            disableGun();
+          }
+        }
+      } else if (gunHeat > 0 && !gunDisabled) {
+        // Update gun heat
+        gunHeat -= gunHeatReduce;
+        heatEl.style.width = (26 - Math.ceil((gunHeat / gunHeatMax) * 26)) + "px";
+      }
+
+      if (gameActive) {
+        setTimeout(fireGun, gameUpdateRate);
+      }
+    };
+
+    const disableGun = () => {
+      gunDisabled = true;
+      setTimeout(() => { gunDisabled = false; }, 2000);
+    };
+
+    const bulletTravel = (bullet) => {
+      // Move bullet
+      const bottom = parseFloat(bullet.style.bottom.replace("px","")) + bulletSpeed;
+      bullet.style.bottom = bottom + "px";
+
+      // Check if bullet hits target
+      if (!targetInvulnerable && bottom > 400 && targetEl.style.display !== "none" && isCollide(bullet, targetEl)) {
+        // Update hitcount and hide bullet
+        hitCount++;
+        scoreEl.innerText = scorePerHit * hitCount;
+        bullet.style.display = "none";
+
+        // Show message
+        showSpeaker();
+        setTimeout(showMessage, 400, message1El, "WHAM", "-50px", "calc(-50% - 15px)", 1);
+        setTimeout(showMessage, 600, message2El, "BAM!", "-50px", "calc(-50% + 15px)", 1);
+        setTimeout(hideMessage, 2000, message1El);
+        setTimeout(hideMessage, 2000, message2El);
+        setTimeout(hideSpeaker, 2000);
+
+        // Destroy target and respawn it
+        destroyTarget();
+        setTimeout(spawnTarget, spawnRate, 1500);
+      }
+
+      // Bullet continues unless it's hidden, in this case remove it from DOM
+      if (bullet.style.display !== "none") {
+        setTimeout(bulletTravel, gameUpdateRate, bullet);
+      } else {
+        bullet.remove();
+      }
+    };
+
+    const bombTravel = (bomb) => {
+      // Move bomb
+      const top = parseFloat(bomb.style.top.replace("px","")) + bombSpeed;
+      bomb.style.top = top + "px";
+
+      // Check if bomb hits target
+      if (!gunInvulnerable && top > 450 && gunEl.style.display !== "none" && isCollide(bomb, gunEl)) {
+        // Update lifecount and hide bomb
+        lifeCount--;
+        if (lifeCount === 2) {
+          lifecountEl.innerText = "||";
+        } else if (lifeCount === 1) {
+          lifecountEl.innerText = "|";
+        } else {
+          stopGame();
+        }
+        bomb.style.display = "none";
+
+        // Show message
+        showSpeaker();
+        setTimeout(showMessage, 400, message1El, "FY", "-50px", "calc(-50% - 15px)", 1);
+        setTimeout(showMessage, 600, message2El, "FÆN!", "-50px", "calc(-50% + 15px)", 1);
+        setTimeout(hideMessage, 2000, message1El);
+        setTimeout(hideMessage, 2000, message2El);
+        setTimeout(hideSpeaker, 2000);
+
+        // Destroy target and respawn it
+        destroyGun();
+        setTimeout(spawnGun, spawnRate, 1500);
+      }
+
+      // Bomb continues unless it's hidden, in this case remove it from DOM
+      if (gameActive && bomb.style.display !== "none") {
+        setTimeout(bombTravel, gameUpdateRate, bomb);
+      } else {
+        // Create explosion elements and spawn in at bomb position
+        const explosion1 = document.createElement("div");
+        explosion1.classList.add("explosion");
+        explosion1.style.top = bomb.style.top;
+        explosion1.style.left = bomb.style.left;
+        mainEl.appendChild(explosion1);
+
+        setTimeout(() => {
+          explosion1.style.transform = "scale(1 , 1)";
+        }, 20);
+        setTimeout(() => {
+          explosion1.style.opacity = "0";
+        }, 400);
+        setTimeout(() => {
+          explosion1.remove();
+        }, 1000);
+
+        bomb.remove();
+      }
+    };
+
+    const missHandler = (entries) => {
+      // If bullet/bomb no longer intersects with main, hide it (will get removed from DOM in bullet/bombTravel)
+      for (const entry of entries) {
+        if (!entry.isIntersecting) {
+          entry.target.style.display = "none";
+        }
+      }
+    };
+
+    const destroyTarget = () => {
+      targetEl.style.display = "none";
+
+      // Create explosion elements and spawn in at target position
+      const explosion1 = document.createElement("div");
+      explosion1.id = "explosion-target-1";
+      explosion1.classList.add("explosion");
+      explosion1.style.top = "80px";
+      explosion1.style.left = (targetPosition) + "px";
+      explosion1.style.transform = "scale(1, 1)";
+      mainEl.appendChild(explosion1);
+
+      const explosion2 = document.createElement("div");
+      explosion2.id = "explosion-target-2";
+      explosion2.classList.add("explosion");
+      explosion2.style.top = "70px";
+      explosion2.style.left = (targetPosition + 10) + "px";
+      mainEl.appendChild(explosion2);
+
+      const explosion3 = document.createElement("div");
+      explosion3.id = "explosion-target-3";
+      explosion3.classList.add("explosion--small");
+      explosion3.style.top = "83px";
+      explosion3.style.left = (targetPosition + 18) + "px";
+      mainEl.appendChild(explosion3);
+
+      setTimeout(() => {
+        explosion2.style.transform = "scale(1, 1)";
+       }, 75);
+       setTimeout(() => {
+        explosion3.style.transform = "scale(1, 1)";
+       }, 150);
+       setTimeout(() => {
+        explosion1.style.opacity = "0";
+        explosion2.style.opacity = "0";
+        explosion3.style.opacity = "0";
+       }, 400);
+      setTimeout(() => {
+        explosion1.remove();
+        explosion2.remove();
+        explosion3.remove();
+       }, 1000);
+    };
+
+    const destroyGun = () => {
+      gunEl.style.display = "none";
+
+      // Create explosion elements and spawn in at gun position
+      const explosion1 = document.createElement("div");
+      explosion1.id = "explosion-gun-1";
+      explosion1.classList.add("explosion");
+      explosion1.style.bottom = "-5px";
+      explosion1.style.left = (gunPosition) + "px";
+      explosion1.style.transform = "scale(1, 1)";
+      mainEl.appendChild(explosion1);
+
+      const explosion2 = document.createElement("div");
+      explosion2.id = "explosion-gun-2";
+      explosion2.classList.add("explosion");
+      explosion2.style.bottom = "5px";
+      explosion2.style.left = (gunPosition + 10) + "px";
+      mainEl.appendChild(explosion2);
+
+      const explosion3 = document.createElement("div");
+      explosion3.id = "explosion-gun-3";
+      explosion3.classList.add("explosion--small");
+      explosion3.style.bottom = "-7px";
+      explosion3.style.left = (gunPosition + 18) + "px";
+      mainEl.appendChild(explosion3);
+
+      setTimeout(() => {
+        explosion2.style.transform = "scale(1, 1)";
+       }, 75);
+       setTimeout(() => {
+        explosion3.style.transform = "scale(1, 1)";
+       }, 150);
+       setTimeout(() => {
+        explosion1.style.opacity = "0";
+        explosion2.style.opacity = "0";
+        explosion3.style.opacity = "0";
+       }, 400);
+      setTimeout(() => {
+        explosion1.remove();
+        explosion2.remove();
+        explosion3.remove();
+       }, 1000);
+    };
+
+    const spawnTarget = (timeInvulnerable) => {
+      if (gameActive) {
+        targetDirection = getRandom([1,2]);
+        targetEl.style.display = "block";
+
+        if (timeInvulnerable > 0) {
+          // Make target invulnerable when spawning in
+          targetInvulnerable = true;
+          targetEl.classList.add("spawned");
+
+          setTimeout(() => {
+            targetInvulnerable = false;
+            targetEl.classList.remove("spawned");
+          }, timeInvulnerable);
+        }
+      }
+    };
+
+    const spawnGun = (timeInvulnerable) => {
+      if (gameActive) {
+        gunPosition = 240;
+        gunHeat = 0;
+        gunDisabled = false;
+        gunEl.style.display = "block";
+        gunEl.style.left = "240px";
+        heatEl.style.width = "26";
+
+        if (timeInvulnerable > 0) {
+          // Make gun invulnerable when spawning in
+          gunEl.classList.add("spawned");
+          gunInvulnerable = true;
+
+          setTimeout(() => {
+            gunEl.classList.remove("spawned");
+            gunInvulnerable = false;
+          }, timeInvulnerable);
+        }
+      }
+    };
+
+    const showMessage = (container, message, translateX, translateY, scale) => {
+      container.innerText = message;
+      container.style.opacity = "1";
+      container.style.transform = `scale(${scale}, ${scale}) translate(${translateX},${translateY})`;
+    };
+
+    const hideMessage = (container) => {
+      container.style.opacity = "0";
+      container.style.transform = `scale(0, 0) translate(-50%,-50%)`;
+    };
+
+    const showSpeaker = () => {
+      speakerEl.style.transform = "translate(35%,-50%) rotate(-55deg)";
+    };
+
+    const hideSpeaker = () => {
+      speakerEl.style.transform = "translate(110%,-50%) rotate(-30deg)";
+    };
+
+    const isCollide = (a, b) => {
+      var aRect = a.getBoundingClientRect();
+      var bRect = b.getBoundingClientRect();
+
+      return !(
+        ((aRect.top + aRect.height) < (bRect.top)) ||
+        (aRect.top > (bRect.top + bRect.height)) ||
+        ((aRect.left + aRect.width) < bRect.left) ||
+        (aRect.left > (bRect.left + bRect.width))
+       );
+    };
+
+    const getRandom = (array) => {
+      return array[Math.floor(Math.random() * array.length)];
+    };
+
+    const initGame = () => {
+      // Initialize event handlers
+      document.addEventListener("keydown", keyboardDownHandler);
+      document.addEventListener("keyup", keyboardUpHandler);
+      gameReadyToStart = true;
+    };
+
+    if (document.readyState !== "loading") {
+      initGame();
+    } else {
+      window.addEventListener("DOMContentLoaded", () => {
+        initGame();
+      });
+    }
+  </script>
+</html>
