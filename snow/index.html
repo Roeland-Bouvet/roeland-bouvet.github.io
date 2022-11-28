@@ -1,159 +1,157 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Snow</title>
+  </head>
+  <body>
+    <div id="snowCanvas" class="snow-canvas">
+    </div>
 
-<head>
-  <title>Snow</title>
-</head>
-
-<body>
-  <div id="snowCanvas" class="snow-canvas">
-  </div>
-</body>
-
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-image: url("sorkedalsveien.jpg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    width: 100%;
-    height: 100vh;
-  }
-
-  .snow-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    z-index: 99999;
-    overflow: hidden;
-  }
-
-  .snow-canvas .snowflake {
-    border-radius: 100%;
-    background: #ffffff;
-    border: 2px solid #b9fffe;
-    position: absolute;
-    top: -30px;
-    box-shadow: 0px 0px 8px 0px #ffffff;
-  }
-</style>
-
-<script>
-  // Variables
-  const snowflakesMax = 50; // max elements at the same time
-  const snowflakesSpawnrate = 150; // ms between spawning new elements
-  const opacities = [0.6, 0.75, 0.9, 1];
-  const speeds = [0.1, 0.12, 0.13, 0.15, 0.2]; // px/ms
-  const sizes = ["6px", "8px", "10px", "12px"];
-  const waveOffsets = [0, 5, 10];
-  const waveAmplitude = 30;
-  const waveFrequency = 100;
-
-  let animate = false;
-  let timeStart = 0
-  let timePrevious = 0;
-  let timeSnowflakeAdded = 0;
-  let snowflakes = [];
-
-  // Html elements
-  const snowCanvasEl = document.getElementById("snowCanvas");
-
-  // Functions
-  const getRandom = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-  };
-
-  const createElement = () => {
-    const size = getRandom(sizes);
-    const opacity = getRandom(opacities);
-    const left = `${Math.floor(snowCanvasEl.offsetWidth * Math.random())}px`;
-
-    const element = document.createElement("div");
-    element.classList.add("snowflake");
-    element.style.left = left;
-    element.style.opacity = opacity;
-    element.style.height = size;
-    element.style.width = size;
-    snowCanvasEl.appendChild(element);
-
-    return element;
-  }
-
-  const animateSnow = (timeCurrent) => {
-    // requestAnimationFrame repeats at monitor refresh rate
-    // Use timestamps to control the speed of animation
-    if (timeStart === 0) {
-      timeStart = timeCurrent;
-    }
-
-    // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
-    // Only animate once per frame
-    if (timePrevious !== timeCurrent) {
-      const snowCanvasHeight = snowCanvasEl.offsetHeight;
-
-      // Add new snowflake until maximum
-      if ((timeCurrent - timeSnowflakeAdded > snowflakesSpawnrate) && (snowflakes.length < snowflakesMax)) {
-        snowflakes.push({
-          timeCreated: timeCurrent,
-          element: createElement(),
-          speed: getRandom(speeds),
-          waveOffset: getRandom(waveOffsets),
-          delete: false
-        });
-        timeSnowflakeAdded = timeCurrent;
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-image: url("sorkedalsveien.jpg");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 100%;
+        height: 100vh;
       }
 
-      // Update all snowflake positions
-      snowflakes.forEach((snowflake) => {
-        const positionY = snowflake.speed * (timeCurrent - snowflake.timeCreated);
+      .snow-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 99999;
+        overflow: hidden;
+      }
 
-        if (positionY < (snowCanvasHeight + 30)) {
-          const positionX = waveAmplitude * Math.sin(positionY/waveFrequency + snowflake.waveOffset);
-          snowflake.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
-        } else {
-          snowflake.delete = true;
-          snowflake.element.remove();
+      .snow-canvas .snowflake {
+        border-radius: 100%;
+        background: #ffffff;
+        border: 2px solid #b9fffe;
+        position: absolute;
+        top: -30px;
+        box-shadow: 0px 0px 8px 0px #ffffff;
+      }
+    </style>
+
+    <script>
+      // Variables
+      const snowflakesMax = 50; // max elements at the same time
+      const snowflakesSpawnrate = 150; // ms between spawning new elements
+      const opacities = [0.6, 0.75, 0.9, 1];
+      const speeds = [0.1, 0.12, 0.13, 0.15, 0.2]; // px/ms
+      const sizes = ["6px", "8px", "10px", "12px"];
+      const waveOffsets = [0, 5, 10];
+      const waveAmplitude = 30;
+      const waveFrequency = 100;
+
+      let animate = false;
+      let timeStart = 0
+      let timePrevious = 0;
+      let timeSnowflakeAdded = 0;
+      let snowflakes = [];
+
+      // Html elements
+      const snowCanvasEl = document.getElementById("snowCanvas");
+
+      // Functions
+      const getRandom = (array) => {
+        return array[Math.floor(Math.random() * array.length)];
+      };
+
+      const createElement = () => {
+        const size = getRandom(sizes);
+        const opacity = getRandom(opacities);
+        const left = `${Math.floor(snowCanvasEl.offsetWidth * Math.random())}px`;
+
+        const element = document.createElement("div");
+        element.classList.add("snowflake");
+        element.style.left = left;
+        element.style.opacity = opacity;
+        element.style.height = size;
+        element.style.width = size;
+        snowCanvasEl.appendChild(element);
+
+        return element;
+      }
+
+      const animateSnow = (timeCurrent) => {
+        // requestAnimationFrame repeats at monitor refresh rate
+        // Use timestamps to control the speed of animation
+        if (timeStart === 0) {
+          timeStart = timeCurrent;
         }
-      });
 
-      // Delete removed snowflakes from array
-      snowflakes = snowflakes.filter((snowflake) => !snowflake.delete);
-    }
+        // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
+        // Only animate once per frame
+        if (timePrevious !== timeCurrent) {
+          const snowCanvasHeight = snowCanvasEl.offsetHeight;
 
-    if (animate) {
-      // Keep animation going
-      timePrevious = timeCurrent;
-      window.requestAnimationFrame(animateSnow);
-    } else {
-      // Remove all snowflakes and reset variables
-      snowflakes.forEach((snowflake) => {
-        snowflake.element.remove();
-      });
-      snowflakes = [];
+          // Add new snowflake until maximum
+          if ((timeCurrent - timeSnowflakeAdded > snowflakesSpawnrate) && (snowflakes.length < snowflakesMax)) {
+            snowflakes.push({
+              timeCreated: timeCurrent,
+              element: createElement(),
+              speed: getRandom(speeds),
+              waveOffset: getRandom(waveOffsets),
+              delete: false
+            });
+            timeSnowflakeAdded = timeCurrent;
+          }
 
-      // Reset variables
-      timeStart = 0;
-      timePrevious = 0;
-      timeSnowflakeAdded = 0;
-    }
-  }
+          // Update all snowflake positions
+          snowflakes.forEach((snowflake) => {
+            const positionY = snowflake.speed * (timeCurrent - snowflake.timeCreated);
 
-  const initSnow = () => {
-    animate = true;
-    window.requestAnimationFrame(animateSnow);
-  };
+            if (positionY < (snowCanvasHeight + 30)) {
+              const positionX = waveAmplitude * Math.sin(positionY / waveFrequency + snowflake.waveOffset);
+              snowflake.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
+            } else {
+              snowflake.delete = true;
+              snowflake.element.remove();
+            }
+          });
 
-  if (document.readyState !== "loading") {
-    initSnow();
-  } else {
-    window.addEventListener("DOMContentLoaded", () => {
-      initSnow();
-    });
-  }
-</script>
+          // Delete removed snowflakes from array
+          snowflakes = snowflakes.filter((snowflake) => !snowflake.delete);
+        }
 
+        if (animate) {
+          // Keep animation going
+          timePrevious = timeCurrent;
+          window.requestAnimationFrame(animateSnow);
+        } else {
+          // Remove all snowflakes and reset variables
+          snowflakes.forEach((snowflake) => {
+            snowflake.element.remove();
+          });
+          snowflakes = [];
+
+          // Reset variables
+          timeStart = 0;
+          timePrevious = 0;
+          timeSnowflakeAdded = 0;
+        }
+      }
+
+      const initSnow = () => {
+        animate = true;
+        window.requestAnimationFrame(animateSnow);
+      };
+
+      if (document.readyState !== "loading") {
+        initSnow();
+      } else {
+        window.addEventListener("DOMContentLoaded", () => {
+          initSnow();
+        });
+      }
+    </script>
+  </body>
 </html>
