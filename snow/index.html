@@ -42,14 +42,14 @@
 
     <script>
       // Variables
-      const snowflakesMax = 50; // max elements at the same time
-      const snowflakesSpawnrate = 150; // ms between spawning new elements
+      let snowflakesMax = 70; // max elements at the same time
+      let snowflakesSpawnrate = 120; // ms between spawning new elements
       const opacities = [0.6, 0.75, 0.9, 1];
-      const speeds = [0.1, 0.12, 0.13, 0.15, 0.2]; // px/ms
+      const speeds = [0.1, 0.11, 0.12, 0.15, 0.2]; // px/ms
       const sizes = ["6px", "8px", "10px", "12px"];
       const waveOffsets = [0, 5, 10];
-      const waveAmplitude = 30;
-      const waveFrequency = 100;
+      const waveAmplitudes = [25, 30, 35];
+      const waveFrequencies = [80, 90, 100];
 
       let animate = false;
       let timeStart = 0
@@ -100,6 +100,8 @@
               element: createElement(),
               speed: getRandom(speeds),
               waveOffset: getRandom(waveOffsets),
+              waveAmplitude: getRandom(waveAmplitudes),
+              waveFrequency: getRandom(waveFrequencies),
               delete: false
             });
             timeSnowflakeAdded = timeCurrent;
@@ -110,7 +112,7 @@
             const positionY = snowflake.speed * (timeCurrent - snowflake.timeCreated);
 
             if (positionY < (snowCanvasHeight + 30)) {
-              const positionX = waveAmplitude * Math.sin(positionY / waveFrequency + snowflake.waveOffset);
+              const positionX = snowflake.waveAmplitude * Math.sin(positionY / snowflake.waveFrequency + snowflake.waveOffset);
               snowflake.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
             } else {
               snowflake.delete = true;
