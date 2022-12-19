@@ -88,7 +88,6 @@
       position: relative;
       overflow: hidden;
       margin: auto;
-      touch-action: none;
     }
 
     .menu {
@@ -292,6 +291,7 @@
       margin: auto;
       justify-content: center;
       align-items: center;
+      touch-action: none;
     }
 
     .controls .button {
@@ -335,8 +335,8 @@
     const bulletSpeed = 6; // px of movement at each update
     const targetSpeed = 4; // px of movement at each update
     const bombSpeed = 2; // px of movement at each update
-    const targetMoveRandomness = 400; // lower => changes direction more often
-    const targetBombRandomness = 100; // lower => drops bombs more often
+    const targetMoveRandomness = 200; // lower => changes direction more often
+    const targetBombRandomness = 50; // lower => drops bombs more often
     const scorePerHit = 25; // points for each hit
     const scorePerAcc = 10; // points for each accuracy %
     const scorePerLife = 50; // points for each remaining life
