@@ -427,6 +427,8 @@
 
     const keyboardDownHandler = (event) => {
       if (gameActive) {
+        event.preventDefault();
+
         if (event.type === "keydown") {
           switch(event.key) {
             case "ArrowLeft":
@@ -490,6 +492,8 @@
 
     const keyboardUpHandler = (event) => {
       if (gameActive) {
+        event.preventDefault();
+
         if (event.type === "keyup") {
           switch(event.key) {
             case "ArrowLeft":
@@ -847,6 +851,7 @@
 
     const destroyGun = () => {
       gunEl.style.display = "none";
+      heatEl.style.width = "26px"
 
       // Create explosion elements and spawn in at gun position
       const explosion1 = document.createElement("div");
@@ -966,7 +971,6 @@
 
     const initGame = () => {
       // Initialize event handlers
-      document.addEventListener("contextmenu", (e) => { e.preventDefault(); });
       document.addEventListener("keydown", keyboardDownHandler);
       document.addEventListener("keyup", keyboardUpHandler);
       buttonLeftEl.addEventListener('touchstart', keyboardDownHandler);
