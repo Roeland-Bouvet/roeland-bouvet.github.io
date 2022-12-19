@@ -331,12 +331,12 @@
     const spawnRate = 1000; // ms delay before target respawns
     const gameUpdateRate = 10; // ms interval for game updates (bullet, target, gun, etc., lower => faster movement)
     const firingUpdateRate = 100; // ms interval for firing rate (lower => higher firerate)
-    const gunSpeed = 0.5; // px/ms of movement
+    const gunSpeed = 0.4; // px/ms of movement
     const bulletSpeed = 6; // px of movement at each update
-    const targetSpeed = 0.4; // px/ms of movement
+    const targetSpeed = 0.3; // px/ms of movement
     const bombSpeed = 2; // px of movement at each update
     const targetMoveRandomness = 200; // lower => changes direction more often
-    const targetBombRandomness = 50; // lower => drops bombs more often
+    const targetBombRandomness = 40; // lower => drops bombs more often
     const scorePerHit = 25; // points for each hit
     const scorePerAcc = 10; // points for each accuracy %
     const scorePerLife = 50; // points for each remaining life
@@ -466,7 +466,7 @@
         setTimeout(countdownTimer, 1000);
 
         // Spawn target
-        spawnTarget(0);
+        spawnTarget(1500);
 
         // Spawn gun and initialize firing
         spawnGun(0);
