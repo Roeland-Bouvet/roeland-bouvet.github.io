@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bouvet Invaders</title>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -85,7 +86,7 @@
     }
 
     .main {
-      width: 500px;
+      max-width: 500px;
       height: 500px;
       border: 1px solid white;
       position: relative;
@@ -134,10 +135,12 @@
 
     .instructions {
       display:block;
+      padding: 0 15px;
     }
 
     .instructions--mobile {
       display:none;
+      padding: 0 15px;
     }
 
     @media (max-width: 960px) {
@@ -303,7 +306,7 @@
 
     .controls {
       display: none;
-      width: 500px;
+      max-width: 500px;
       margin: auto;
       justify-content: center;
       align-items: center;
@@ -349,6 +352,7 @@
     const gunHeatMax = 1000; // max level of heat
     const gunHeatAdd = 200; // heat added per shot fired
     const gunHeatReduce = 5; // heat removed per shot not fired
+    const mainWidth = window.outerWidth > 530 ? 500 : window.outerWidth - 30;
 
     // Starting variables
     let gameActive,
@@ -395,12 +399,12 @@
       gameReadyToStart = false;
       countDown = gameTime;
       targetDirection = 0;
-      targetPosition = 240;
+      targetPosition = (mainWidth/2) - 20;
       targetInvulnerable = false;
       gunMovingLeft = false;
       gunMovingRight = false;
       gunFiring = false;
-      gunPosition = 240;
+      gunPosition = (mainWidth/2) - 20;
       gunHeat = 0;
       gunDisabled = false;
       gunInvulnerable = false;
@@ -564,7 +568,7 @@
       } else if (targetDirection === 2) {
         targetPosition += targetSpeed;
 
-        if (targetPosition > 450) {
+        if (targetPosition > (mainWidth-40)) {
           // Change direction if edge of container is reached
           targetDirection = 1
         } else {
@@ -617,8 +621,8 @@
         gunEl.style.left = gunPosition + "px";
       } else if (gunMovingRight) {
         gunPosition += gunSpeed;
-        if (gunPosition > 460) {
-          gunPosition = 460;
+        if (gunPosition > (mainWidth-40)) {
+          gunPosition = (mainWidth-40);
         }
         gunEl.style.left = gunPosition + "px";
       }
