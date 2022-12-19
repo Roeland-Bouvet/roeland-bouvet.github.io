@@ -30,11 +30,7 @@
         <div class="instructions--mobile">
           Shoot as many invaders as possible before the time runs out!
           <br><br>
-          Left and right arrow buttons to move
-          <br>
-          SHOOT to fire
-          <br><br>
-          Press SHOOT to start
+          Press FIRE to start
         </div>
       </div>
       <div class="stats">
@@ -58,10 +54,10 @@
       <img id="speaker" class="speaker" src="speaker.png" />
       <div id="message1" class="message"></div>
       <div id="message2" class="message"></div>
-      <div id="target" class="target" style="left:240px">
+      <div id="target" class="target">
         <img src="ufo-white.svg" />
       </div>
-      <div id="gun" class="gun" style="left: 240px;">
+      <div id="gun" class="gun">
         <!-- <div class="turret"></div> -->
         <img src="tank-white.svg" />
         <div class="heatColor"></div>
@@ -70,7 +66,7 @@
     </main>
     <div class="controls">
       <div id="buttonLeft" class="button">&larr;</div>
-      <div id="buttonShoot" class="button button--center">SHOOT</div>
+      <div id="buttonFire" class="button button--center">FIRE</div>
       <div id="buttonRight" class="button">&rarr;</div>
     </div>
   </body>
@@ -83,6 +79,11 @@
       font-size: 13px;
       background: black;
       color: white;
+      user-select: none; /* supported by Chrome and Opera */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
     }
 
     .main {
@@ -143,7 +144,7 @@
       padding: 0 15px;
     }
 
-    @media (max-width: 960px) {
+    @media (max-width: 768px) {
       .instructions {
         display:none;
       }
@@ -290,6 +291,8 @@
       left: 50%;
       transform: translate(-50%,-50%);
       font-size: 34px;
+      width: 100%;
+      text-align: center;
     }
 
     .spawned {
@@ -317,17 +320,23 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 15px;
       border: 1px solid white;
       margin: 15px 0;
       font-size: 20px;
+      height: 40px;
     }
 
     .controls .button--center {
       margin: 15px;
+      font-size: 13px;
     }
 
-    @media (max-width: 960px) {
+    .controls .button--pressed {
+      background-color: white;
+      color: black;
+    }
+
+    @media (max-width: 768px) {
       .controls {
         display: flex;
       }
@@ -352,7 +361,7 @@
     const gunHeatMax = 1000; // max level of heat
     const gunHeatAdd = 200; // heat added per shot fired
     const gunHeatReduce = 5; // heat removed per shot not fired
-    const mainWidth = window.outerWidth > 530 ? 500 : window.outerWidth - 30;
+    const mainWidth = window.outerWidth > 532 ? 500 : window.outerWidth - 32;
 
     // Starting variables
     let gameActive,
@@ -391,7 +400,7 @@
     const message2El = document.getElementById("message2");
     const buttonLeftEl = document.getElementById("buttonLeft");
     const buttonRightEl = document.getElementById("buttonRight");
-    const buttonShootEl = document.getElementById("buttonShoot");
+    const buttonFireEl = document.getElementById("buttonFire");
 
     // Functions
     const resetVariables = () => {
@@ -442,18 +451,21 @@
             case buttonLeftEl:
               // Start moving left
               gunMovingLeft = true;
+              buttonLeftEl.classList.add("button--pressed");
               break;
             case buttonRightEl:
               // Start moving right
               gunMovingRight = true;
+              buttonRightEl.classList.add("button--pressed");
               break;
-            case buttonShootEl:
+            case buttonFireEl:
               // Start firing
               gunFiring = true;
+              buttonFireEl.classList.add("button--pressed");
               break;
           }
         }
-      } else if (gameReadyToStart && (event.key === "Enter" || (event.type === "touchstart" && event.currentTarget === buttonShootEl))) {
+      } else if (gameReadyToStart && (event.key === "Enter" || (event.type === "touchstart" && event.currentTarget === buttonFireEl))) {
         // Reset variables and scoreboard
         resetVariables();
         lifecountEl.innerText = "|||";
@@ -498,14 +510,17 @@
             case buttonLeftEl:
               // Stop moving left
               gunMovingLeft = false;
+              buttonLeftEl.classList.remove("button--pressed");
               break;
             case buttonRightEl:
               // Stop moving right
               gunMovingRight = false;
+              buttonRightEl.classList.remove("button--pressed");
               break;
-            case buttonShootEl:
+            case buttonFireEl:
               // Stop firing
               gunFiring = false;
+              buttonFireEl.classList.remove("button--pressed");
               break;
           }
         }
@@ -894,11 +909,11 @@
 
     const spawnGun = (timeInvulnerable) => {
       if (gameActive) {
-        gunPosition = 240;
+        gunPosition = (mainWidth/2) - 20;;
         gunHeat = 0;
         gunDisabled = false;
         gunEl.style.display = "block";
-        gunEl.style.left = "240px";
+        gunEl.style.left = gunPosition + "px";
         heatEl.style.width = "26";
 
         if (timeInvulnerable > 0) {
@@ -951,14 +966,15 @@
 
     const initGame = () => {
       // Initialize event handlers
+      document.addEventListener("contextmenu", (e) => { e.preventDefault(); });
       document.addEventListener("keydown", keyboardDownHandler);
       document.addEventListener("keyup", keyboardUpHandler);
       buttonLeftEl.addEventListener('touchstart', keyboardDownHandler);
       buttonLeftEl.addEventListener('touchend', keyboardUpHandler);
       buttonRightEl.addEventListener('touchstart', keyboardDownHandler);
       buttonRightEl.addEventListener('touchend', keyboardUpHandler);
-      buttonShootEl.addEventListener('touchstart', keyboardDownHandler);
-      buttonShootEl.addEventListener('touchend', keyboardUpHandler);
+      buttonFireEl.addEventListener('touchstart', keyboardDownHandler);
+      buttonFireEl.addEventListener('touchend', keyboardUpHandler);
       gameReadyToStart = true;
     };
 
