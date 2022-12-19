@@ -26,6 +26,15 @@
           <br><br>
           Press enter to start
         </div>
+        <div class="instructions--mobile">
+          Shoot as many invaders as possible before the time runs out!
+          <br><br>
+          Left and right arrow buttons to move
+          <br>
+          SHOOT to fire
+          <br><br>
+          Press SHOOT to start
+        </div>
       </div>
       <div class="stats">
         <table>
@@ -58,6 +67,11 @@
         <div id="heat" class="heat"></div>
       </div>
     </main>
+    <div class="controls">
+      <div id="buttonLeft" class="button">&larr;</div>
+      <div id="buttonShoot" class="button button--center">SHOOT</div>
+      <div id="buttonRight" class="button">&rarr;</div>
+    </div>
   </body>
 
   <style>
@@ -116,6 +130,24 @@
       justify-content: space-between;
       align-items: center;
       padding: 5px;
+    }
+
+    .instructions {
+      display:block;
+    }
+
+    .instructions--mobile {
+      display:none;
+    }
+
+    @media (max-width: 960px) {
+      .instructions {
+        display:none;
+      }
+
+      .instructions--mobile {
+        display:block;
+      }
     }
 
     table {
@@ -268,6 +300,35 @@
       50% {opacity: 1;}
       100% {opacity: 0.5;}
     }
+
+    .controls {
+      display: none;
+      width: 500px;
+      margin: auto;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .controls .button {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid white;
+      margin: 15px 0;
+      font-size: 20px;
+    }
+
+    .controls .button--center {
+      margin: 15px;
+    }
+
+    @media (max-width: 960px) {
+      .controls {
+        display: flex;
+      }
+    }
   </style>
 
   <script>
@@ -324,6 +385,9 @@
     const speakerEl = document.getElementById("speaker");
     const message1El = document.getElementById("message1");
     const message2El = document.getElementById("message2");
+    const buttonLeftEl = document.getElementById("buttonLeft");
+    const buttonRightEl = document.getElementById("buttonRight");
+    const buttonShootEl = document.getElementById("buttonShoot");
 
     // Functions
     const resetVariables = () => {
@@ -350,25 +414,42 @@
 
     const keyboardDownHandler = (event) => {
       if (gameActive) {
-        switch(event.key) {
-          case "ArrowLeft":
-            // Start moving left
-            gunMovingLeft = true;
-            break;
-          case "ArrowRight":
-            // Start moving right
-            gunMovingRight = true;
-            break;
-          case " ":
-            // Start firing
-            gunFiring = true;
-            break;
-          case "Escape":
-            // Stop the game
-            stopGame();
-            break;
+        if (event.type === "keydown") {
+          switch(event.key) {
+            case "ArrowLeft":
+              // Start moving left
+              gunMovingLeft = true;
+              break;
+            case "ArrowRight":
+              // Start moving right
+              gunMovingRight = true;
+              break;
+            case " ":
+              // Start firing
+              gunFiring = true;
+              break;
+            case "Escape":
+              // Stop the game
+              stopGame();
+              break;
+          }
+        } else if (event.type === "touchstart") {
+          switch(event.currentTarget) {
+            case buttonLeftEl:
+              // Start moving left
+              gunMovingLeft = true;
+              break;
+            case buttonRightEl:
+              // Start moving right
+              gunMovingRight = true;
+              break;
+            case buttonShootEl:
+              // Start firing
+              gunFiring = true;
+              break;
+          }
         }
-      } else if (gameReadyToStart && event.key === "Enter") {
+      } else if (gameReadyToStart && (event.key === "Enter" || (event.type === "touchstart" && event.currentTarget === buttonShootEl))) {
         // Reset variables and scoreboard
         resetVariables();
         lifecountEl.innerText = "|||";
@@ -393,19 +474,36 @@
 
     const keyboardUpHandler = (event) => {
       if (gameActive) {
-        switch(event.key) {
-          case "ArrowLeft":
-            // Stop moving left
-            gunMovingLeft = false;
-            break;
-          case "ArrowRight":
-            // Stop moving right
-            gunMovingRight = false;
-            break;
-          case " ":
-            // Stop firing
-            gunFiring = false;
-            break;
+        if (event.type === "keyup") {
+          switch(event.key) {
+            case "ArrowLeft":
+              // Stop moving left
+              gunMovingLeft = false;
+              break;
+            case "ArrowRight":
+              // Stop moving right
+              gunMovingRight = false;
+              break;
+            case " ":
+              // Stop firing
+              gunFiring = false;
+              break;
+          }
+        } else if (event.type === "touchend") {
+          switch(event.currentTarget) {
+            case buttonLeftEl:
+              // Stop moving left
+              gunMovingLeft = false;
+              break;
+            case buttonRightEl:
+              // Stop moving right
+              gunMovingRight = false;
+              break;
+            case buttonShootEl:
+              // Stop firing
+              gunFiring = false;
+              break;
+          }
         }
       }
     };
@@ -851,6 +949,12 @@
       // Initialize event handlers
       document.addEventListener("keydown", keyboardDownHandler);
       document.addEventListener("keyup", keyboardUpHandler);
+      buttonLeftEl.addEventListener('touchstart', keyboardDownHandler);
+      buttonLeftEl.addEventListener('touchend', keyboardUpHandler);
+      buttonRightEl.addEventListener('touchstart', keyboardDownHandler);
+      buttonRightEl.addEventListener('touchend', keyboardUpHandler);
+      buttonShootEl.addEventListener('touchstart', keyboardDownHandler);
+      buttonShootEl.addEventListener('touchend', keyboardUpHandler);
       gameReadyToStart = true;
     };
 
