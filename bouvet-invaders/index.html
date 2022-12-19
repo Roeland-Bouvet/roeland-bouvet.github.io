@@ -331,9 +331,9 @@
     const spawnRate = 1000; // ms delay before target respawns
     const gameUpdateRate = 10; // ms interval for game updates (bullet, target, gun, etc., lower => faster movement)
     const firingUpdateRate = 100; // ms interval for firing rate (lower => higher firerate)
-    const gunSpeed = 5; // px of movement at each update
+    const gunSpeed = 0.5; // px/ms of movement
     const bulletSpeed = 6; // px of movement at each update
-    const targetSpeed = 4; // px of movement at each update
+    const targetSpeed = 0.4; // px/ms of movement
     const bombSpeed = 2; // px of movement at each update
     const targetMoveRandomness = 200; // lower => changes direction more often
     const targetBombRandomness = 50; // lower => drops bombs more often
@@ -364,7 +364,9 @@
     shotCount,
     hitCount,
     bombCount,
-    lifeCount;
+    lifeCount,
+    timeStart,
+    timePrevious;
 
     // Html elements
     const mainEl = document.getElementById("main");
@@ -405,6 +407,8 @@
       hitCount = 0;
       bombCount = 0;
       lifeCount = 3;
+      timeStart = 0;
+      timePrevious = 0;
     };
 
     const keyboardDownHandler = (event) => {
@@ -461,16 +465,39 @@
         gameActive = true;
         setTimeout(countdownTimer, 1000);
 
-        // Spawn target and initialize movement
+        // Spawn target
         spawnTarget(0);
-        moveTarget();
 
-        // Spawn gun and initialize movement and firing
+        // Spawn gun and initialize firing
         spawnGun(0);
-        moveGun();
         fireGun();
+
+        // Start animation updates
+        window.requestAnimationFrame(updateFrame);
       }
     };
+
+    const updateFrame = (timeCurrent) => {
+      // requestAnimationFrame repeats at monitor refresh rate
+      // Use timestamps to control the speed of animation
+      if (timeStart === 0) {
+        timeStart = timeCurrent;
+        timePrevious = timeCurrent;
+      }
+
+      // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
+      // Only animate once per frame
+      if (timePrevious !== timeCurrent) {
+        const timeDiff = timeCurrent - timePrevious;
+        moveTarget(timeDiff);
+        moveGun(timeDiff);
+      }
+
+      if (gameActive) {
+        timePrevious = timeCurrent;
+        window.requestAnimationFrame(updateFrame);
+      }
+    }
 
     const keyboardUpHandler = (event) => {
       if (gameActive) {
@@ -556,9 +583,9 @@
       }, 2000);
     };
 
-    const moveTarget = () => {
+    const moveTarget = (timeDiff) => {
       if (targetDirection === 1) {
-        targetPosition -= targetSpeed;
+        targetPosition -= targetSpeed * timeDiff;
 
         if (targetPosition < 0) {
           // Change direction if edge of container is reached
@@ -567,7 +594,7 @@
           targetEl.style.transform = `translateX(${targetPosition}px)`;
         }
       } else if (targetDirection === 2) {
-        targetPosition += targetSpeed;
+        targetPosition += targetSpeed * timeDiff;
 
         if (targetPosition > (mainWidth-40)) {
           // Change direction if edge of container is reached
@@ -609,29 +636,29 @@
         bombTravel(bomb);
       }
 
-      if (gameActive) {
-        setTimeout(moveTarget, gameUpdateRate);
-      }
+      // if (gameActive) {
+      //   setTimeout(moveTarget, gameUpdateRate);
+      // }
     };
 
-    const moveGun = () => {
+    const moveGun = (timeDiff) => {
       if (gunMovingLeft) {
-        gunPosition -= gunSpeed;
+        gunPosition -= gunSpeed * timeDiff;
         if (gunPosition < 0) {
           gunPosition = 0;
         }
         gunEl.style.transform = `translateX(${gunPosition}px)`;
       } else if (gunMovingRight) {
-        gunPosition += gunSpeed;
+        gunPosition += gunSpeed * timeDiff;
         if (gunPosition > (mainWidth-40)) {
           gunPosition = (mainWidth-40);
         }
         gunEl.style.transform = `translateX(${gunPosition}px)`;
       }
 
-      if (gameActive) {
-        setTimeout(moveGun, gameUpdateRate);
-      }
+      // if (gameActive) {
+      //   setTimeout(moveGun, gameUpdateRate);
+      // }
     };
 
     const fireGun = () => {
