@@ -79,11 +79,6 @@
       font-size: 13px;
       background: black;
       color: white;
-      user-select: none; /* supported by Chrome and Opera */
-      -webkit-user-select: none; /* Safari */
-      -khtml-user-select: none; /* Konqueror HTML */
-      -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer/Edge */
     }
 
     .main {
@@ -93,6 +88,7 @@
       position: relative;
       overflow: hidden;
       margin: auto;
+      touch-action: none;
     }
 
     .menu {
@@ -169,10 +165,6 @@
       top: 75px;
       height: 20px;
       width: 35px;
-      /* border-radius: 100%;
-      background: white;
-      overflow: hidden; */
-      will-change: left;
     }
 
     .target img {
@@ -185,25 +177,12 @@
       bottom: 0;
       height: 20px;
       width: 40px;
-      /* background: white;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px; */
-      will-change: left;
     }
 
     .gun img {
       height: 100%;
       width: 100%;
     }
-
-    /* .turret {
-      position: absolute;
-      height: 10px;
-      width: 6px;
-      top: -10px;
-      left: 17px;
-      background: white;
-    } */
 
     .heatColor {
       position: absolute;
@@ -324,6 +303,9 @@
       margin: 15px 0;
       font-size: 20px;
       height: 40px;
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10 and IE 11 */
+      user-select: none; /* Standard syntax */
     }
 
     .controls .button--center {
@@ -582,7 +564,7 @@
           // Change direction if edge of container is reached
           targetDirection = 2
         } else {
-          targetEl.style.left = targetPosition + "px";
+          targetEl.style.transform = `translateX(${targetPosition}px)`;
         }
       } else if (targetDirection === 2) {
         targetPosition += targetSpeed;
@@ -591,7 +573,7 @@
           // Change direction if edge of container is reached
           targetDirection = 1
         } else {
-          targetEl.style.left = targetPosition + "px";
+          targetEl.style.transform = `translateX(${targetPosition}px)`;
         }
       }
 
@@ -608,8 +590,9 @@
         const bomb = document.createElement('div');
         bomb.id = 'bomb-' + bombCount;
         bomb.classList.add("bomb");
-        bomb.style.top = "100px";
+        bomb.style.top = "0";
         bomb.style.left = (targetPosition + 18.5) + "px";
+        bomb.dataset.translateY = 100;
         mainEl.appendChild(bomb);
 
         // Start an intersection observer to handle bombs going off screen
@@ -637,13 +620,13 @@
         if (gunPosition < 0) {
           gunPosition = 0;
         }
-        gunEl.style.left = gunPosition + "px";
+        gunEl.style.transform = `translateX(${gunPosition}px)`;
       } else if (gunMovingRight) {
         gunPosition += gunSpeed;
         if (gunPosition > (mainWidth-40)) {
           gunPosition = (mainWidth-40);
         }
-        gunEl.style.left = gunPosition + "px";
+        gunEl.style.transform = `translateX(${gunPosition}px)`;
       }
 
       if (gameActive) {
@@ -669,8 +652,9 @@
           const bullet = document.createElement('div');
           bullet.id = 'bullet-' + shotCount;
           bullet.classList.add("bullet");
-          bullet.style.bottom = "30px";
+          bullet.style.bottom = "0";
           bullet.style.left = (gunPosition + 18.5) + "px";
+          bullet.dataset.translateY = -25;
           mainEl.appendChild(bullet);
 
           // Start an intersection observer to handle bullets going off screen
@@ -709,11 +693,12 @@
 
     const bulletTravel = (bullet) => {
       // Move bullet
-      const bottom = parseFloat(bullet.style.bottom.replace("px","")) + bulletSpeed;
-      bullet.style.bottom = bottom + "px";
+      const bottom = parseFloat(bullet.dataset.translateY) - bulletSpeed;
+      bullet.style.transform = `translateY(${bottom}px)`;
+      bullet.dataset.translateY = bottom;
 
       // Check if bullet hits target
-      if (!targetInvulnerable && bottom > 400 && targetEl.style.display !== "none" && isCollide(bullet, targetEl)) {
+      if (!targetInvulnerable && bottom < -400 && targetEl.style.display !== "none" && isCollide(bullet, targetEl)) {
         // Update hitcount and hide bullet
         hitCount++;
         scoreEl.innerText = scorePerHit * hitCount;
@@ -742,8 +727,9 @@
 
     const bombTravel = (bomb) => {
       // Move bomb
-      const top = parseFloat(bomb.style.top.replace("px","")) + bombSpeed;
-      bomb.style.top = top + "px";
+      const top = parseFloat(bomb.dataset.translateY) + bombSpeed;
+      bomb.style.transform = `translateY(${top}px)`;
+      bomb.dataset.translateY = top;
 
       // Check if bomb hits target
       if (!gunInvulnerable && top > 450 && gunEl.style.display !== "none" && isCollide(bomb, gunEl)) {
@@ -778,7 +764,7 @@
         // Create explosion elements and spawn in at bomb position
         const explosion1 = document.createElement("div");
         explosion1.classList.add("explosion");
-        explosion1.style.top = bomb.style.top;
+        explosion1.style.top = bomb.dataset.translateY + "px";
         explosion1.style.left = bomb.style.left;
         mainEl.appendChild(explosion1);
 
@@ -918,7 +904,7 @@
         gunHeat = 0;
         gunDisabled = false;
         gunEl.style.display = "block";
-        gunEl.style.left = gunPosition + "px";
+        gunEl.style.transform = `translateX(${gunPosition}px)`;
         heatEl.style.width = "26";
 
         if (timeInvulnerable > 0) {
