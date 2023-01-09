@@ -58,7 +58,6 @@
         <img src="ufo-white.svg" />
       </div>
       <div id="gun" class="gun">
-        <!-- <div class="turret"></div> -->
         <img src="tank-white.svg" />
         <div class="heatColor"></div>
         <div id="heat" class="heat"></div>
@@ -296,9 +295,8 @@
 
     .controls .button {
       flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      text-align: center;
+      line-height: 40px;
       border: 1px solid white;
       margin: 15px 0;
       font-size: 20px;
@@ -329,23 +327,22 @@
     // Global game constants
     const gameTime = 60; // total s per game
     const spawnRate = 1000; // ms delay before target respawns
-    const gameUpdateRate = 10; // ms interval for game updates (bullet, target, gun, etc., lower => faster movement)
-    const firingUpdateRate = 100; // ms interval for firing rate (lower => higher firerate)
+    const firingRate = 125; // ms interval for firing rate (lower => higher firerate)
     const gunSpeed = 0.4; // px/ms of movement
-    const bulletSpeed = 6; // px of movement at each update
+    const bulletSpeed = 0.45; // px/ms of movement
     const targetSpeed = 0.3; // px/ms of movement
-    const bombSpeed = 2; // px of movement at each update
-    const targetMoveRandomness = 200; // lower => changes direction more often
-    const targetBombRandomness = 40; // lower => drops bombs more often
+    const bombSpeed = 0.15; // px/ms of movement
+    const targetMoveRandomness = 3200; // lower => changes direction more often
+    const targetBombRandomness = 640; // lower => drops bombs more often
     const scorePerHit = 25; // points for each hit
     const scorePerAcc = 10; // points for each accuracy %
     const scorePerLife = 50; // points for each remaining life
     const gunHeatMax = 1000; // max level of heat
     const gunHeatAdd = 200; // heat added per shot fired
-    const gunHeatReduce = 5; // heat removed per shot not fired
+    const gunHeatReduceRate = 0.5; // heat removed/ms
     const mainWidth = window.outerWidth > 532 ? 500 : window.outerWidth - 32;
 
-    // Starting variables
+    // Variables
     let gameActive,
     gameReadyToStart,
     countDown,
@@ -366,7 +363,9 @@
     bombCount,
     lifeCount,
     timeStart,
-    timePrevious;
+    timePrevious,
+    bombs = [],
+    bullets = [];
 
     // Html elements
     const mainEl = document.getElementById("main");
@@ -411,7 +410,14 @@
       timePrevious = 0;
     };
 
-    const keyboardDownHandler = (event) => {
+    const resetScoreboard = () => {
+      lifecountEl.innerText = "|||";
+      countdownEl.innerText = gameTime;
+      scoreEl.innerText = "0";
+      menuEl.style.display = "none";
+    };
+
+    const pressDownHandler = (event) => {
       if (gameActive) {
         event.preventDefault();
 
@@ -456,50 +462,22 @@
       } else if (gameReadyToStart && (event.key === "Enter" || (event.type === "touchstart" && event.currentTarget === buttonFireEl))) {
         // Reset variables and scoreboard
         resetVariables();
-        lifecountEl.innerText = "|||";
-        countdownEl.innerText = gameTime;
-        scoreEl.innerText = "0";
-        menuEl.style.display = "none";
+        resetScoreboard();
 
         // Start game and begin countdown
         gameActive = true;
         setTimeout(countdownTimer, 1000);
 
-        // Spawn target
+        // Spawn elements
         spawnTarget(1500);
-
-        // Spawn gun and initialize firing
         spawnGun(0);
-        fireGun();
 
         // Start animation updates
         window.requestAnimationFrame(updateFrame);
       }
     };
 
-    const updateFrame = (timeCurrent) => {
-      // requestAnimationFrame repeats at monitor refresh rate
-      // Use timestamps to control the speed of animation
-      if (timeStart === 0) {
-        timeStart = timeCurrent;
-        timePrevious = timeCurrent;
-      }
-
-      // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
-      // Only animate once per frame
-      if (timePrevious !== timeCurrent) {
-        const timeDiff = timeCurrent - timePrevious;
-        moveTarget(timeDiff);
-        moveGun(timeDiff);
-      }
-
-      if (gameActive) {
-        timePrevious = timeCurrent;
-        window.requestAnimationFrame(updateFrame);
-      }
-    }
-
-    const keyboardUpHandler = (event) => {
+    const pressUpHandler = (event) => {
       if (gameActive) {
         event.preventDefault();
 
@@ -553,6 +531,30 @@
       }
     };
 
+    const updateFrame = (timeCurrent) => {
+      // requestAnimationFrame repeats at monitor refresh rate
+      // Use timestamps to control the speed of animation
+      if (timeStart === 0) {
+        timeStart = timeCurrent;
+        timePrevious = timeCurrent;
+      }
+
+      // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
+      // Only animate once per frame
+      if (timePrevious !== timeCurrent) {
+        const timeDiff = timeCurrent - timePrevious;
+        moveTarget(timeDiff);
+        moveGun(timeDiff);
+        moveBombs(timeDiff);
+        moveBullets(timeDiff);
+      }
+
+      if (gameActive) {
+        timePrevious = timeCurrent;
+        window.requestAnimationFrame(updateFrame);
+      }
+    }
+
     const stopGame = () => {
       // Stop the game
       gameActive = false;
@@ -565,7 +567,7 @@
         hideMessage(centralMessageEl);
         const totalAccuracy = shotCount > 0 ? Math.round((hitCount/shotCount) * 100) : 0;
         const totalScore = hitCount * scorePerHit;
-        const bonusAccScore = totalAccuracy * scorePerAcc;
+        const bonusAccScore = totalAccuracy * scorePerAcc <= (gameTime / 5) * scorePerHit ? totalAccuracy * scorePerAcc : (gameTime / 5) * scorePerHit;
         const bonusLivesScore = lifeCount * scorePerLife;
         const finalscore = totalScore + bonusAccScore + bonusLivesScore;
         resultsEl.innerHTML = `<span class="subtitle">GAME OVER!</span><br><br>
@@ -605,12 +607,12 @@
       }
 
       // Randomly change direction sometimes
-      if (Math.floor(Math.random() * targetMoveRandomness) === 1) {
+      if (Math.floor(Math.random() * targetMoveRandomness / timeDiff) === 1) {
         targetDirection = targetDirection === 1 ? 2 : 1;
       }
 
       // Randomly drop bombs sometimes
-      if (targetEl.style.display !== "none" && Math.floor(Math.random() * targetBombRandomness) === 1) {
+      if (targetEl.style.display !== "none" && Math.floor(Math.random() * targetBombRandomness / timeDiff) === 1) {
         bombCount ++;
 
         // Create bomb element and spawn in at target position
@@ -619,7 +621,6 @@
         bomb.classList.add("bomb");
         bomb.style.top = "0";
         bomb.style.left = (targetPosition + 18.5) + "px";
-        bomb.dataset.translateY = 100;
         mainEl.appendChild(bomb);
 
         // Start an intersection observer to handle bombs going off screen
@@ -632,13 +633,8 @@
         let observer = new IntersectionObserver(missHandler, options);
         observer.observe(bomb);
 
-        // Start bomb movement
-        bombTravel(bomb);
+        bombs.push({element: bomb, translateY: 100, removed: false});
       }
-
-      // if (gameActive) {
-      //   setTimeout(moveTarget, gameUpdateRate);
-      // }
     };
 
     const moveGun = (timeDiff) => {
@@ -656,17 +652,10 @@
         gunEl.style.transform = `translateX(${gunPosition}px)`;
       }
 
-      // if (gameActive) {
-      //   setTimeout(moveGun, gameUpdateRate);
-      // }
-    };
-
-    const fireGun = () => {
-      timeElapsed += gameUpdateRate;
-
+      timeElapsed += timeDiff;
       if (gunEl.style.display !== "none" && gunFiring && !gunDisabled) {
         // Regulate fire rate
-        if (timeElapsed >= timeLastFireUpdate + firingUpdateRate) {
+        if (timeElapsed >= timeLastFireUpdate + firingRate) {
           timeLastFireUpdate = timeElapsed;
           shotCount++;
 
@@ -681,7 +670,6 @@
           bullet.classList.add("bullet");
           bullet.style.bottom = "0";
           bullet.style.left = (gunPosition + 18.5) + "px";
-          bullet.dataset.translateY = -25;
           mainEl.appendChild(bullet);
 
           // Start an intersection observer to handle bullets going off screen
@@ -694,8 +682,7 @@
           let observer = new IntersectionObserver(missHandler, options);
           observer.observe(bullet);
 
-          // Start bullet movement
-          bulletTravel(bullet);
+          bullets.push({element: bullet, translateY: -25, removed: false});
 
           // Disable gun if overheated
           if (gunHeat >= gunHeatMax) {
@@ -704,118 +691,126 @@
         }
       } else if (gunHeat > 0 && !gunDisabled) {
         // Update gun heat
-        gunHeat -= gunHeatReduce;
+        gunHeat -= gunHeatReduceRate * timeDiff;
+        if (gunHeat < 0) gunHeat = 0;
         heatEl.style.width = (26 - Math.ceil((gunHeat / gunHeatMax) * 26)) + "px";
       }
-
-      if (gameActive) {
-        setTimeout(fireGun, gameUpdateRate);
-      }
     };
 
-    const disableGun = () => {
-      gunDisabled = true;
-      setTimeout(() => { gunDisabled = false; }, 2000);
-    };
+    const moveBullets = (timeDiff) => {
+      const movement = bulletSpeed * timeDiff;
 
-    const bulletTravel = (bullet) => {
-      // Move bullet
-      const bottom = parseFloat(bullet.dataset.translateY) - bulletSpeed;
-      bullet.style.transform = `translateY(${bottom}px)`;
-      bullet.dataset.translateY = bottom;
+      bullets.forEach((bullet) => {
+        // Move bullet
+        bullet.translateY -= movement;
+        bullet.element.style.transform = `translateY(${bullet.translateY}px)`;
 
-      // Check if bullet hits target
-      if (!targetInvulnerable && bottom < -400 && targetEl.style.display !== "none" && isCollide(bullet, targetEl)) {
-        // Update hitcount and hide bullet
-        hitCount++;
-        scoreEl.innerText = scorePerHit * hitCount;
-        bullet.style.display = "none";
+        // Check if bullet hits target
+        if (!targetInvulnerable && bullet.translateY < -400 && targetEl.style.display !== "none" && isCollide(bullet.element, targetEl)) {
+          // Update hitcount and hide bullet
+          hitCount++;
+          scoreEl.innerText = scorePerHit * hitCount;
+          bullet.element.style.display = "none";
 
-        // Show message
-        showSpeaker();
-        setTimeout(showMessage, 400, message1El, "WHAM", "-50px", "calc(-50% - 15px)", 1);
-        setTimeout(showMessage, 600, message2El, "BAM!", "-50px", "calc(-50% + 15px)", 1);
-        setTimeout(hideMessage, 2000, message1El);
-        setTimeout(hideMessage, 2000, message2El);
-        setTimeout(hideSpeaker, 2000);
+          // Show message
+          showSpeaker();
+          setTimeout(showMessage, 400, message1El, "WHAM", "-50px", "calc(-50% - 15px)", 1);
+          setTimeout(showMessage, 600, message2El, "BAM!", "-50px", "calc(-50% + 15px)", 1);
+          setTimeout(hideMessage, 2000, message1El);
+          setTimeout(hideMessage, 2000, message2El);
+          setTimeout(hideSpeaker, 2000);
 
-        // Destroy target and respawn it
-        destroyTarget();
-        setTimeout(spawnTarget, spawnRate, 1500);
-      }
-
-      // Bullet continues unless it's hidden, in this case remove it from DOM
-      if (bullet.style.display !== "none") {
-        setTimeout(bulletTravel, gameUpdateRate, bullet);
-      } else {
-        bullet.remove();
-      }
-    };
-
-    const bombTravel = (bomb) => {
-      // Move bomb
-      const top = parseFloat(bomb.dataset.translateY) + bombSpeed;
-      bomb.style.transform = `translateY(${top}px)`;
-      bomb.dataset.translateY = top;
-
-      // Check if bomb hits target
-      if (!gunInvulnerable && top > 450 && gunEl.style.display !== "none" && isCollide(bomb, gunEl)) {
-        // Update lifecount and hide bomb
-        lifeCount--;
-        if (lifeCount === 2) {
-          lifecountEl.innerText = "||";
-        } else if (lifeCount === 1) {
-          lifecountEl.innerText = "|";
-        } else {
-          stopGame();
+          // Destroy target and respawn it
+          destroyTarget();
+          setTimeout(spawnTarget, spawnRate, 1500);
         }
-        bomb.style.display = "none";
 
-        // Show message
-        showSpeaker();
-        setTimeout(showMessage, 400, message1El, "FY", "-50px", "calc(-50% - 15px)", 1);
-        setTimeout(showMessage, 600, message2El, "FÆN!", "-50px", "calc(-50% + 15px)", 1);
-        setTimeout(hideMessage, 2000, message1El);
-        setTimeout(hideMessage, 2000, message2El);
-        setTimeout(hideSpeaker, 2000);
+        // Bullet continues unless it's hidden, in this case remove it from DOM
+        if (!gameActive || bullet.element.style.display === "none") {
+          bullet.element.remove();
+          bullet.removed = true;
+        }
+      });
 
-        // Destroy target and respawn it
-        destroyGun();
-        setTimeout(spawnGun, spawnRate, 1500);
-      }
+      // Delete removed bullets from array
+      bullets = bullets.filter((bullet) => !bullet.removed);
+    };
 
-      // Bomb continues unless it's hidden, in this case remove it from DOM
-      if (gameActive && bomb.style.display !== "none") {
-        setTimeout(bombTravel, gameUpdateRate, bomb);
-      } else {
-        // Create explosion elements and spawn in at bomb position
-        const explosion1 = document.createElement("div");
-        explosion1.classList.add("explosion");
-        explosion1.style.top = bomb.dataset.translateY + "px";
-        explosion1.style.left = bomb.style.left;
-        mainEl.appendChild(explosion1);
+    const moveBombs = (timeDiff) => {
+      const movement = bombSpeed * timeDiff;
 
-        setTimeout(() => {
-          explosion1.style.transform = "scale(1 , 1)";
-        }, 20);
-        setTimeout(() => {
-          explosion1.style.opacity = "0";
-        }, 400);
-        setTimeout(() => {
-          explosion1.remove();
-        }, 1000);
+      bombs.forEach((bomb) => {
+        // Move bomb
+        bomb.translateY += movement;
+        bomb.element.style.transform = `translateY(${bomb.translateY}px)`;
 
-        bomb.remove();
-      }
+        // Check if bomb hits target
+        if (!gunInvulnerable && bomb.translateY > 450 && gunEl.style.display !== "none" && isCollide(bomb.element, gunEl)) {
+          // Update lifecount and hide bomb
+          lifeCount--;
+          if (lifeCount === 2) {
+            lifecountEl.innerText = "||";
+          } else if (lifeCount === 1) {
+            lifecountEl.innerText = "|";
+          } else {
+            lifecountEl.innerText = "";
+            stopGame();
+          }
+          bomb.element.style.display = "none";
+
+          // Show message
+          showSpeaker();
+          setTimeout(showMessage, 400, message1El, "FY", "-50px", "calc(-50% - 15px)", 1);
+          setTimeout(showMessage, 600, message2El, "FAEN!", "-50px", "calc(-50% + 15px)", 1);
+          setTimeout(hideMessage, 2000, message1El);
+          setTimeout(hideMessage, 2000, message2El);
+          setTimeout(hideSpeaker, 2000);
+
+          // Destroy target and respawn it
+          destroyGun();
+          setTimeout(spawnGun, spawnRate, 1500);
+        }
+
+        // Bomb continues unless it's hidden, in this case remove it from DOM
+        if (!gameActive || bomb.element.style.display === "none") {
+          // Create explosion elements and spawn in at bomb position
+          const explosion1 = document.createElement("div");
+          explosion1.classList.add("explosion");
+          explosion1.style.top = bomb.translateY + "px";
+          explosion1.style.left = bomb.element.style.left;
+          mainEl.appendChild(explosion1);
+
+          setTimeout(() => {
+            explosion1.style.transform = "scale(1 , 1)";
+          }, 20);
+          setTimeout(() => {
+            explosion1.style.opacity = "0";
+          }, 400);
+          setTimeout(() => {
+            explosion1.remove();
+          }, 1000);
+
+          bomb.element.remove();
+          bomb.removed = true;
+        }
+      });
+
+      // Delete removed bombs from array
+      bombs = bombs.filter((bomb) => !bomb.removed);
     };
 
     const missHandler = (entries) => {
-      // If bullet/bomb no longer intersects with main, hide it (will get removed from DOM in bullet/bombTravel)
+      // If bullet/bomb no longer intersects with main, hide it (will get removed from DOM in moveBullets/moveBombs)
       for (const entry of entries) {
         if (!entry.isIntersecting) {
           entry.target.style.display = "none";
         }
       }
+    };
+
+    const disableGun = () => {
+      gunDisabled = true;
+      setTimeout(() => { gunDisabled = false; }, 1500);
     };
 
     const destroyTarget = () => {
@@ -932,7 +927,7 @@
         gunDisabled = false;
         gunEl.style.display = "block";
         gunEl.style.transform = `translateX(${gunPosition}px)`;
-        heatEl.style.width = "26";
+        heatEl.style.width = "26px";
 
         if (timeInvulnerable > 0) {
           // Make gun invulnerable when spawning in
@@ -984,14 +979,14 @@
 
     const initGame = () => {
       // Initialize event handlers
-      document.addEventListener("keydown", keyboardDownHandler);
-      document.addEventListener("keyup", keyboardUpHandler);
-      buttonLeftEl.addEventListener('touchstart', keyboardDownHandler);
-      buttonLeftEl.addEventListener('touchend', keyboardUpHandler);
-      buttonRightEl.addEventListener('touchstart', keyboardDownHandler);
-      buttonRightEl.addEventListener('touchend', keyboardUpHandler);
-      buttonFireEl.addEventListener('touchstart', keyboardDownHandler);
-      buttonFireEl.addEventListener('touchend', keyboardUpHandler);
+      document.addEventListener("keydown", pressDownHandler);
+      document.addEventListener("keyup", pressUpHandler);
+      buttonLeftEl.addEventListener('touchstart', pressDownHandler);
+      buttonLeftEl.addEventListener('touchend', pressUpHandler);
+      buttonRightEl.addEventListener('touchstart', pressDownHandler);
+      buttonRightEl.addEventListener('touchend', pressUpHandler);
+      buttonFireEl.addEventListener('touchstart', pressDownHandler);
+      buttonFireEl.addEventListener('touchend', pressUpHandler);
       gameReadyToStart = true;
     };
 
