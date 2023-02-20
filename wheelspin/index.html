@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8">
-    <title>Wheelspin</title>
+    <title>Wheel of fortune</title>
   </head>
   <body>
     <h1>Wheel of fortune</h1>
@@ -101,7 +101,7 @@
         width: 20px;
         height: 30px;
         position: absolute;
-        left: 140px;
+        left: 210px;
         top: -15px;
         background: black;
         z-index: 999;
@@ -112,8 +112,8 @@
       .wheel {
         display: inline-block;
         position: relative;
-        width: 300px;
-        height: 300px;
+        width: 440px;
+        height: 440px;
         background-color: #999;
         transition: transform cubic-bezier(0.15, 1.15, 1, 0.99) 10s;
         border-radius: 100%;
@@ -121,21 +121,21 @@
       }
 
       .spoke {
-        width: 150px;
-        height: 150px;
+        width: 220px;
+        height: 220px;
         position: absolute;
         display: flex;
         justify-content: center;
         align-items: center;
         clip-path: polygon(100% 0, 0 0, 50% 100%);
         transform-origin: 50% 100%;
-        bottom: 150px;
-        left: 75px;
+        bottom: 220px;
+        left: 110px;
       }
 
       .spoke span {
         display: block;
-        width: 100px;
+        width: 140px;
         max-height: 40px;
         overflow: hidden;
         word-break: break-word;
@@ -143,11 +143,36 @@
         text-align: center;
         transform: rotate(-90deg);
         position: absolute;
-        bottom: 80px;
+        bottom: 120px;
         border-radius: 20px;
         color: white;
         background: rgba(0,0,0,0.20);
-        padding: 2px;
+        padding: 5px;
+      }
+
+      @media only screen and (max-width: 768px) {
+        .arrow {
+          left: 140px;
+        }
+
+        .wheel {
+          width: 300px;
+          height: 300px;
+        }
+
+        .spoke {
+          width: 150px;
+          height: 150px;
+          bottom: 150px;
+          left: 75px;
+        }
+
+        .spoke span {
+          width: 100px;
+          max-height: 40px;
+          bottom: 80px;
+          padding: 2px;
+        }
       }
     </style>
 
@@ -175,6 +200,7 @@
           console.log(error);
         }
 
+        // Set some default entries
         if (!entries) {
           entries = [
             {text: "11:00", background: "#bc0000", count: 1},
@@ -199,6 +225,7 @@
 
           const countEl = document.createElement("input");
           countEl.type = "number";
+          countEl.min = "0";
           countEl.value = entry.count;
 
           wrapperEl.appendChild(textEl);
@@ -211,10 +238,14 @@
       const loadWheel = () => {
         wheelEl.innerHTML = "";
 
+        const wheelWidth = wheelEl.clientWidth;
         let total = 0;
 
         entries.forEach((entry) => {
-          total += entry.count;
+          const count = parseInt(entry.count);
+          if (count > 0) {
+            total += entry.count;
+          }
         });
 
         // Minimum 8
@@ -227,14 +258,15 @@
           }
         }
 
-        let width = Math.floor(1000 / total);
-        let left = Math.floor((300 - width) / 2);
-        let rotationIncrease = Math.floor(360 / total);
+        let width = 2 * (wheelWidth / 2) * Math.tan(Math.PI / total);
+        let left = (wheelWidth - width) / 2;
+        let rotationIncrease = 360 / total;
         let rotation = 0;
 
         entries.forEach((entry) => {
-          if (entry.count > 0) {
-            for (let i = 0; i < entry.count; i++) {
+          const count = parseInt(entry.count);
+          if (count > 0) {
+            for (let i = 0; i < count; i++) {
               const spokeEl = document.createElement("div");
               spokeEl.classList.add("spoke");
               spokeEl.style.transform = "rotate(" + rotation + "deg)";
@@ -268,6 +300,7 @@
 
         const countEl = document.createElement("input");
         countEl.type = "number";
+        countEl.min = "0";
         countEl.value = "1";
 
         wrapperEl.appendChild(textEl);
@@ -281,7 +314,6 @@
 
         Array.from(entryListEl.children).forEach((child) => {
           entries.push({text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)});
-          console.log(child.children[0].value);
         });
 
         try {
