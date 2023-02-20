@@ -195,13 +195,21 @@
 
       const loadEntries = () => {
         try {
-          entries = JSON.parse(localStorage.getItem("entries")) || [];
+          const storedEntries = localStorage.getItem("entries");
+          if (storedEntries) {
+            entries = JSON.parse(storedEntries);
+          } else {
+            // Set some default entries on first visit
+            entries = [
+              {text: "11:00", background: "#bc0000", count: 1},
+              {text: "11:15", background: "#191970", count: 1},
+              {text: "11:30", background: "#51a400", count: 1},
+              {text: "11:45", background: "#800080", count: 1},
+              {text: "12:00", background: "#e29300", count: 1}
+            ];
+          }
         } catch(error) {
           console.log(error);
-        }
-
-        // Set some default entries
-        if (!entries) {
           entries = [
             {text: "11:00", background: "#bc0000", count: 1},
             {text: "11:15", background: "#191970", count: 1},
