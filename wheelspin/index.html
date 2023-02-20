@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <title>Wheelspin</title>
+  </head>
+  <body>
+    <h1>Wheel of fortune</h1>
+    <main>
+      <div class="list-panel">
+        <button id="btnAdd">Add entry</button>
+        <div id="entryList" class="list-entries">
+        </div>
+        <button id="btnSave">Save</button>
+      </div>
+      <div class="action-panel">
+        <div class="frame">
+          <div class="arrow"></div>
+          <div id="wheel" class="wheel"></div>
+          <button id="btnSpin">SPIN THE WHEEL!</button>
+        </div>
+      </div>
+    </main>
+
+    <style>
+      body {
+        margin: 15px;
+        padding: 0;
+        position: relative;
+        font-family: system-ui;
+        font-size: 14px;
+        background: #fcf8f3;
+        color: #11133c;
+      }
+
+      main {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: #11133c;
+        color: #fcf8f3;
+        border-radius: 5px;
+        padding: 5px 10px;
+        border: 1px solid #11133c;
+        cursor: pointer;
+        transition: all ease 200ms;
+      }
+
+      button:hover,
+      button:focus-visible {
+        background: #2a2e78;
+      }
+
+      .list-panel {
+        padding: 0 30px 30px 0;
+        flex: 0 0 300px;
+      }
+
+      .list-panel button {
+        margin: 0 15px 15px 0;
+      }
+
+      .list-entries {
+        margin-bottom: 15px;
+      }
+
+      .list-entries .inputfields {
+        display: flex;
+      }
+
+      input[type="number"] {
+        width: 40px;
+      }
+
+      input[type="text"] {
+        flex: 1;
+      }
+
+      .action-panel button {
+        margin: 30px auto 0 auto;
+        display: block;
+        background: #f9ead4;
+        color: #11133c;
+        border: 1px solid #11133c;
+      }
+
+      .action-panel button:hover,
+      .action-panel button:focus-visible {
+        background: #2a2e78;
+        color:#fcf8f3;
+      }
+
+      .frame {
+        position: relative;
+      }
+
+      .arrow {
+        width: 20px;
+        height: 30px;
+        position: absolute;
+        left: 140px;
+        top: -15px;
+        background: black;
+        z-index: 999;
+        clip-path: polygon(100% 0, 0 0, 50% 100%);
+        box-shadow: 10px 10px 20px -10px rgba(0,0,0,0.50);
+      }
+
+      .wheel {
+        display: inline-block;
+        position: relative;
+        width: 300px;
+        height: 300px;
+        background-color: #999;
+        transition: transform cubic-bezier(0.15, 1.15, 1, 0.99) 10s;
+        border-radius: 100%;
+        overflow: hidden;
+      }
+
+      .spoke {
+        width: 150px;
+        height: 150px;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        clip-path: polygon(100% 0, 0 0, 50% 100%);
+        transform-origin: 50% 100%;
+        bottom: 150px;
+        left: 75px;
+      }
+
+      .spoke span {
+        display: block;
+        width: 100px;
+        max-height: 40px;
+        overflow: hidden;
+        word-break: break-word;
+        color: white;
+        text-align: center;
+        transform: rotate(-90deg);
+        position: absolute;
+        bottom: 80px;
+        border-radius: 20px;
+        color: white;
+        background: rgba(0,0,0,0.20);
+        padding: 2px;
+      }
+    </style>
+
+    <script>
+      // Html elements
+      const wheelEl = document.getElementById("wheel");
+      const btnAddEl = document.getElementById("btnAdd");
+      const btnSaveEl = document.getElementById("btnSave");
+      const btnSpinEl = document.getElementById("btnSpin");
+      const entryListEl = document.getElementById("entryList");
+
+      // Variables
+      let entries;
+      let rotationDeg = 0;
+
+      // Functions
+      const getRandom = (start, end) => {
+        return Math.floor(Math.random() * (end - start + 1) + start);
+      };
+
+      const loadEntries = () => {
+        try {
+          entries = JSON.parse(localStorage.getItem("entries")) || [];
+        } catch(error) {
+          console.log(error);
+        }
+
+        if (!entries) {
+          entries = [
+            {text: "11:00", background: "#bc0000", count: 1},
+            {text: "11:15", background: "#191970", count: 1},
+            {text: "11:30", background: "#51a400", count: 1},
+            {text: "11:45", background: "#800080", count: 1},
+            {text: "12:00", background: "#e29300", count: 1}
+          ];
+        }
+
+        entries.forEach((entry) => {
+          const wrapperEl = document.createElement("div");
+          wrapperEl.classList.add("inputfields");
+
+          const textEl = document.createElement("input");
+          textEl.type = "text";
+          textEl.value = entry.text;
+
+          const colorEl = document.createElement("input");
+          colorEl.type = "color";
+          colorEl.value = entry.background;
+
+          const countEl = document.createElement("input");
+          countEl.type = "number";
+          countEl.value = entry.count;
+
+          wrapperEl.appendChild(textEl);
+          wrapperEl.appendChild(colorEl);
+          wrapperEl.appendChild(countEl);
+          entryListEl.appendChild(wrapperEl);
+        });
+      };
+
+      const loadWheel = () => {
+        wheelEl.innerHTML = "";
+
+        let total = 0;
+
+        entries.forEach((entry) => {
+          total += entry.count;
+        });
+
+        // Minimum 8
+        let exit = 1;
+        if (total > 0 && total < 8) {
+          while(total < 8 && exit < 8) {
+            entries = entries.concat(...entries);
+            total = total * 2;
+            exit++;
+          }
+        }
+
+        let width = Math.floor(1000 / total);
+        let left = Math.floor((300 - width) / 2);
+        let rotationIncrease = Math.floor(360 / total);
+        let rotation = 0;
+
+        entries.forEach((entry) => {
+          if (entry.count > 0) {
+            for (let i = 0; i < entry.count; i++) {
+              const spokeEl = document.createElement("div");
+              spokeEl.classList.add("spoke");
+              spokeEl.style.transform = "rotate(" + rotation + "deg)";
+              spokeEl.style.background = entry.background;
+              spokeEl.style.width = width + "px";
+              spokeEl.style.left = left + "px";
+
+              if (entry.text) {
+                const textEl = document.createElement("span");
+                textEl.innerText = entry.text;
+                spokeEl.appendChild(textEl);
+              }
+
+              wheelEl.appendChild(spokeEl);
+
+              rotation += rotationIncrease;
+            }
+          }
+        });
+      };
+
+      btnAddEl.addEventListener('click', () => {
+        const wrapperEl = document.createElement("div");
+        wrapperEl.classList.add("inputfields");
+
+        const textEl = document.createElement("input");
+        textEl.type = "text";
+
+        const colorEl = document.createElement("input");
+        colorEl.type = "color";
+
+        const countEl = document.createElement("input");
+        countEl.type = "number";
+        countEl.value = "1";
+
+        wrapperEl.appendChild(textEl);
+        wrapperEl.appendChild(colorEl);
+        wrapperEl.appendChild(countEl);
+        entryListEl.appendChild(wrapperEl);
+      });
+
+      btnSaveEl.addEventListener('click', () => {
+        entries = [];
+
+        Array.from(entryListEl.children).forEach((child) => {
+          entries.push({text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)});
+          console.log(child.children[0].value);
+        });
+
+        try {
+          localStorage.setItem("entries", JSON.stringify(entries));
+        } catch(error) {
+          console.log(error);
+        }
+
+        loadWheel();
+      });
+
+      btnSpinEl.addEventListener('click', () => {
+        const randomDeg = getRandom(1800, 2160);
+        rotationDeg += randomDeg;
+        wheelEl.style.transform = `rotate(${rotationDeg}deg)`;
+      });
+
+      if (document.readyState !== "loading") {
+        loadEntries();
+        loadWheel();
+      } else {
+        window.addEventListener("DOMContentLoaded", () => {
+          loadEntries();
+          loadWheel();
+        });
+      }
+    </script>
+  </body>
+</html>
