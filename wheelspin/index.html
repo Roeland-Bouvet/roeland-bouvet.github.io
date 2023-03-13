@@ -9,9 +9,9 @@
     <h1>Wheel of fortune</h1>
     <main>
       <div class="list-panel">
-        <button id="btnAdd">Add entry</button>
         <div id="entryList" class="list-entries">
         </div>
+        <button id="btnAdd">Add entry</button>
         <button id="btnSave">Save</button>
       </div>
       <div class="action-panel">
@@ -69,14 +69,27 @@
 
       .list-entries .inputfields {
         display: flex;
+        margin-bottom: 3px;
       }
 
-      input[type="number"] {
+      .inputfields input[type="number"] {
         width: 40px;
       }
 
-      input[type="text"] {
+      .inputfields input[type="text"] {
         flex: 1;
+      }
+
+      .inputfields button {
+        padding: 0 5px;
+        margin: 0 0 0 3px;
+        font-size: 10px;
+      }
+
+      .action-panel {
+        margin: auto;
+        padding-top: 15px;
+        overflow: hidden;
       }
 
       .action-panel button {
@@ -150,7 +163,19 @@
         padding: 5px;
       }
 
-      @media only screen and (max-width: 768px) {
+      @media only screen and (max-width: 800px) {
+        body {
+          margin: 5px;
+        }
+
+        main {
+          flex-direction: column;
+        }
+
+        .list-panel {
+          padding-right: 0;
+        }
+
         .arrow {
           left: 140px;
         }
@@ -172,6 +197,7 @@
           max-height: 40px;
           bottom: 80px;
           padding: 2px;
+          font-size: 10px;
         }
       }
     </style>
@@ -236,9 +262,20 @@
           countEl.min = "0";
           countEl.value = entry.count;
 
+          const btnDeleteEl = document.createElement("button");
+          btnDeleteEl.innerHTML = "&#10006;";
+
+          btnDeleteEl.addEventListener('click', (event) => {
+            const wrapper = event.target.closest(".inputfields");
+            if (wrapper) {
+              wrapper.remove();
+            }
+          });
+
           wrapperEl.appendChild(textEl);
           wrapperEl.appendChild(colorEl);
           wrapperEl.appendChild(countEl);
+          wrapperEl.appendChild(btnDeleteEl);
           entryListEl.appendChild(wrapperEl);
         });
       };
@@ -311,10 +348,23 @@
         countEl.min = "0";
         countEl.value = "1";
 
+        const btnDeleteEl = document.createElement("button");
+        btnDeleteEl.innerHTML = "&#10006;";
+
+        btnDeleteEl.addEventListener('click', (event) => {
+          const wrapper = event.target.closest(".inputfields");
+          if (wrapper) {
+            wrapper.remove();
+          }
+        });
+
         wrapperEl.appendChild(textEl);
         wrapperEl.appendChild(colorEl);
         wrapperEl.appendChild(countEl);
+        wrapperEl.appendChild(btnDeleteEl);
         entryListEl.appendChild(wrapperEl);
+
+        textEl.focus();
       });
 
       btnSaveEl.addEventListener('click', () => {
@@ -338,6 +388,8 @@
         rotationDeg += randomDeg;
         wheelEl.style.transform = `rotate(${rotationDeg}deg)`;
       });
+
+      window.addEventListener ("resize", loadWheel);
 
       if (document.readyState !== "loading") {
         loadEntries();
