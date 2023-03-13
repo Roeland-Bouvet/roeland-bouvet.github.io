@@ -39,6 +39,10 @@
         flex-wrap: wrap;
       }
 
+      h1 {
+        margin-top: 0;
+      }
+
       button {
         background: #11133c;
         color: #fcf8f3;
@@ -95,15 +99,6 @@
       .action-panel button {
         margin: 30px auto 0 auto;
         display: block;
-        background: #f9ead4;
-        color: #11133c;
-        border: 1px solid #11133c;
-      }
-
-      .action-panel button:hover,
-      .action-panel button:focus-visible {
-        background: #2a2e78;
-        color:#fcf8f3;
       }
 
       .frame {
@@ -163,13 +158,9 @@
         padding: 5px;
       }
 
-      @media only screen and (max-width: 800px) {
+      @media only screen and (max-width: 560px) {
         body {
           margin: 5px;
-        }
-
-        main {
-          flex-direction: column;
         }
 
         .list-panel {
@@ -333,71 +324,77 @@
         });
       };
 
-      btnAddEl.addEventListener('click', () => {
-        const wrapperEl = document.createElement("div");
-        wrapperEl.classList.add("inputfields");
+      const loadEventListeners = () => {
+        btnAddEl.addEventListener('click', () => {
+          const wrapperEl = document.createElement("div");
+          wrapperEl.classList.add("inputfields");
 
-        const textEl = document.createElement("input");
-        textEl.type = "text";
+          const textEl = document.createElement("input");
+          textEl.type = "text";
 
-        const colorEl = document.createElement("input");
-        colorEl.type = "color";
+          const colorEl = document.createElement("input");
+          colorEl.type = "color";
 
-        const countEl = document.createElement("input");
-        countEl.type = "number";
-        countEl.min = "0";
-        countEl.value = "1";
+          const countEl = document.createElement("input");
+          countEl.type = "number";
+          countEl.min = "0";
+          countEl.value = "1";
 
-        const btnDeleteEl = document.createElement("button");
-        btnDeleteEl.innerHTML = "&#10006;";
+          const btnDeleteEl = document.createElement("button");
+          btnDeleteEl.innerHTML = "&#10006;";
 
-        btnDeleteEl.addEventListener('click', (event) => {
-          const wrapper = event.target.closest(".inputfields");
-          if (wrapper) {
-            wrapper.remove();
+          btnDeleteEl.addEventListener('click', (event) => {
+            const wrapper = event.target.closest(".inputfields");
+            if (wrapper) {
+              wrapper.remove();
+            }
+          });
+
+          wrapperEl.appendChild(textEl);
+          wrapperEl.appendChild(colorEl);
+          wrapperEl.appendChild(countEl);
+          wrapperEl.appendChild(btnDeleteEl);
+          entryListEl.appendChild(wrapperEl);
+
+          textEl.focus();
+        });
+
+        btnSaveEl.addEventListener('click', () => {
+          entries = [];
+
+          Array.from(entryListEl.children).forEach((child) => {
+            entries.push({text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)});
+          });
+
+          try {
+            localStorage.setItem("entries", JSON.stringify(entries));
+          } catch(error) {
+            console.log(error);
           }
+
+          loadWheel();
         });
 
-        wrapperEl.appendChild(textEl);
-        wrapperEl.appendChild(colorEl);
-        wrapperEl.appendChild(countEl);
-        wrapperEl.appendChild(btnDeleteEl);
-        entryListEl.appendChild(wrapperEl);
-
-        textEl.focus();
-      });
-
-      btnSaveEl.addEventListener('click', () => {
-        entries = [];
-
-        Array.from(entryListEl.children).forEach((child) => {
-          entries.push({text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)});
+        btnSpinEl.addEventListener('click', () => {
+          const randomDeg = getRandom(1800, 2160);
+          rotationDeg += randomDeg;
+          wheelEl.style.transform = `rotate(${rotationDeg}deg)`;
         });
 
-        try {
-          localStorage.setItem("entries", JSON.stringify(entries));
-        } catch(error) {
-          console.log(error);
-        }
+        window.addEventListener ("resize", loadWheel);
+      };
 
-        loadWheel();
-      });
-
-      btnSpinEl.addEventListener('click', () => {
-        const randomDeg = getRandom(1800, 2160);
-        rotationDeg += randomDeg;
-        wheelEl.style.transform = `rotate(${rotationDeg}deg)`;
-      });
-
-      window.addEventListener ("resize", loadWheel);
-
-      if (document.readyState !== "loading") {
+      const initWheel = () => {
         loadEntries();
         loadWheel();
+        loadEventListeners();
+      };
+
+      if (document.readyState !== "loading") {
+        initWheel();
       } else {
         window.addEventListener("DOMContentLoaded", () => {
-          loadEntries();
-          loadWheel();
+          initWheel();
         });
       }
     </script>
