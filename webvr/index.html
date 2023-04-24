@@ -5,35 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WebVR Test</title>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <style>
-  </style>
 </head>
 
 <body>
   <a-scene>
+    <!-- Listing all assests to be used -->
     <a-assets>
-      <img id="eli" src="images/eli.png">
+      <img id="rg" src="images/rg.png">
       <img id="sky" src="images/sky.jpg">
       <img id="ground" src="images/ground.jpg">
     </a-assets>
 
+    <!-- Setting up lights -->
     <a-light type="ambient" color="#8b897e"></a-light>
-    <a-entity
-      light="type: directional;
-        castShadow: true;
-        intensity: 0.5;
-        shadowCameraVisible: false;"
-      position="-10 30 -50">
-    </a-entity>
+    <a-entity light="type: directional; castShadow: true; intensity: 0.6; shadowCameraVisible: false;" position="-10 30 -50"></a-entity>
 
-    <a-box position="-5 0.5 -3" rotation="0 45 0" src="#eli" shadow="cast: true"></a-box>
-    <a-sphere position="0 1.25 -8" radius="1.25" rotation="0 -40 0" src="#eli" shadow="cast: true"></a-sphere>
-    <a-cylinder position="3 0.75 -5" radius="0.5" rotation="0 120 0" height="1.5" src="#eli" shadow="cast: true"></a-cylinder>
-    <!-- <a-sky color="#8ecdff"></a-sky> -->
-    <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#df916d" roughness="1" shadow="receive: true"></a-plane> -->
+    <!-- Adding objects to the world -->
+    <a-box position="-5 0.5 -3" rotation="0 45 0" src="#rg" shadow="cast: true"></a-box>
+    <a-sphere position="0 1.25 -8" radius="1.25" rotation="0 -40 0" src="#rg" color="white" shadow="cast: true"></a-sphere>
+    <a-cylinder position="3 0.75 -5" radius="0.5" rotation="0 120 0" height="1.5" src="#rg" shadow="cast: true"></a-cylinder>
 
+    <!-- Setting ground and sky -->
     <a-sky src="#sky"></a-sky>
     <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" src="#ground" roughness="1" repeat="20 20" shadow="cast: true"></a-plane>
+    <!-- <a-sky color="#8ecdff"></a-sky> -->
+    <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#df916d" roughness="1" shadow="receive: true"></a-plane> -->
   </a-scene>
 </body>
 
