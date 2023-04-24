@@ -16,14 +16,22 @@
       <img id="ground" src="images/ground.jpg">
     </a-assets>
 
+    <!-- Audio :) -->
+    <a-sound src="src: url(2001.mp3)" autoplay="true" position="0 2 -10" volume="1"></a-sound>
+
+     <!-- Setting up the camera -->
+    <a-entity id="rig" position="-2 0 -5">
+      <a-camera id="camera"></a-camera>
+    </a-entity>
+
     <!-- Setting up lights -->
     <a-light type="ambient" color="#8b897e"></a-light>
     <a-entity light="type: directional; castShadow: true; intensity: 0.6; shadowCameraVisible: false;" position="-10 30 -50"></a-entity>
 
     <!-- Adding objects to the world -->
-    <a-box position="-5 0.5 -3" rotation="0 45 0" src="#rg" shadow="cast: true"></a-box>
-    <a-sphere position="0 1.25 -8" radius="1.25" rotation="0 -40 0" src="#rg" color="white" shadow="cast: true"></a-sphere>
-    <a-cylinder position="3 0.75 -5" radius="0.5" rotation="0 120 0" height="1.5" src="#rg" shadow="cast: true"></a-cylinder>
+    <a-text position="0 0.5 -10.15" value="Made in China" color="white" width="1.5" rotation="0 180 0"></a-text>
+    <a-box position="0 2 -10" rotation="0 0 0" width="1.5" height="4" depth="0.3" color="#171718" metalness="1" shadow="cast: true"></a-box>
+    <a-sphere position="0 1.25 5" radius="1.25" rotation="0 145 0" src="#rg" shadow="cast: true"></a-sphere>
 
     <!-- Setting ground and sky -->
     <a-sky src="#sky"></a-sky>
