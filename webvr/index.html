@@ -14,14 +14,16 @@
       <img id="rg" src="images/rg.png">
       <img id="sky" src="images/sky.jpg">
       <img id="ground" src="images/ground.jpg">
+      <audio id="2001" src="2001.mp3" preload="auto"></audio>
     </a-assets>
 
-    <!-- Audio :) -->
-    <a-sound src="src: url(2001.mp3)" autoplay="true" position="0 2 -10" volume="1"></a-sound>
+    <!-- Audio -->
+    <a-sound id="2001" src="#2001" position="0 2 -10" volume="1"></a-sound>
 
      <!-- Setting up the camera -->
     <a-entity id="rig" position="-2 0 -5">
-      <a-camera id="camera"></a-camera>
+      <a-camera id="camera">
+      </a-camera>
     </a-entity>
 
     <!-- Setting up lights -->
@@ -39,6 +41,19 @@
     <!-- <a-sky color="#8ecdff"></a-sky> -->
     <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#df916d" roughness="1" shadow="receive: true"></a-plane> -->
   </a-scene>
+  <script>
+    //Doesn't work, figure out later
+    let soundPlaying = false;
+    const soundEl = document.getElementById('2001');
+    const cameraEl = document.getElementById('camera');
+    cameraEl.addEventListener('componentchanged', (evt) => {
+      if (!soundPlaying && (evt.name === 'rotation' || evt.name === 'position')) {
+        soundPlaying = true;
+        soundEl.play();
+      }
+      return;
+    });
+  </script>
 </body>
 
 </html>
