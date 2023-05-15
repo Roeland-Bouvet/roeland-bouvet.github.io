@@ -1,0 +1,86 @@
+.building {
+    // This is the main building
+    box-sizing: border-box;
+    border: 3px solid #999;
+    width: 600px;
+    background: #9999;
+    padding: 15px 15px 0 15px;
+
+    &__floor {
+        // This is a subpart of the building
+        background: linear-gradient(0deg, #d0e8ff, #89b2ff);
+        height: 100px;
+        margin-bottom: 15px;
+        display: flex;
+
+        .carpet {
+            // This is a general component which can be used in one or more of the floor subparts
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            width: 100%;
+            background: white;
+
+            &--blue {
+                // This is a general modifier for the carpet
+                background: darkblue;
+            }
+
+            &--red {
+                // This is a general modifier for the carpet
+                background: darkred;
+            }
+
+            &--green {
+                // This is a general modifier for the carpet
+                background: darkgreen;
+            }
+        }
+
+        &__hallway {
+            // This is subpart of the floor
+            position: relative;
+            flex: 0 0 30px;
+
+            .carpet {
+                // Hallway specific changes for carpet here
+                height: 2px;
+            }
+        }
+
+        &__rooms {
+            // This is subpart of the floor
+            position: relative;
+            flex: 1;
+            display: flex;
+
+            .room {
+                // Start a new "root" class to nest further subparts
+                flex: 1;
+                position: relative;
+                border-left: 3px solid #999;
+                display: flex;
+
+                .carpet {
+                    // Room specific changes for carpet here
+                    height: 4px;
+                }
+
+                &__entrance {
+                    // This is subpart of the room
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    height: 50px;
+                    width: 25px;
+                    background: #656565;
+                }
+
+                &__workspace {
+                    // This is subpart of the room
+                    flex: 1;
+                }
+            }
+        }
+    }
+}

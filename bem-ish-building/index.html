@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The BEM-ish Building</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <h1>The BEM-ish Building</h1>
+    <hr>
+    The building below is a demonstration on the use of the <a href="https://getbem.com/" target="_blank">BEM</a> convention, while allowing a bit more leniency/flexibility, with the goal of providing a clear and consistent CSS.
+    Feel free to inspect the building below and the use of blocks, elements and modifiers. Check out the SCSS <a href="https://github.com/Roeland-Bouvet/roeland-bouvet.github.io/blob/main/bem-ish-building/main.scss" target="_blank">here</a>.
+    <br>
+    <br>
+    Notes:
+    <ul>
+        <li>
+            Avoid using very generic classnames that could be used already in other parts.
+        </li>
+        <li>
+            Avoid chaining too many "&__" elements. Look to start a new "block" class when it makes sense.
+        </li>
+        <li>
+            Define classes that can be used in several different elements/blocks higher up the tree.
+        </li>
+    </ul>
+    <br>
+    <br>
+    <div class="building">
+        <div class="building__floor">
+            <div class="building__floor__hallway">
+                <div class="carpet">
+                </div>
+            </div>
+            <div class="building__floor__rooms">
+                <div class="room">
+                    <div class="carpet carpet--green">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+                <div class="room">
+                    <div class="carpet carpet--red">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="building__floor">
+            <div class="building__floor__hallway">
+                <div class="carpet">
+                </div>
+            </div>
+            <div class="building__floor__rooms">
+                <div class="room">
+                    <div class="carpet carpet--blue">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+                <div class="room">
+                    <div class="carpet carpet--green">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="building__floor">
+            <div class="building__floor__hallway">
+                <div class="carpet">
+                </div>
+            </div>
+            <div class="building__floor__rooms">
+                <div class="room">
+                    <div class="carpet carpet--red">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+                <div class="room">
+                    <div class="carpet carpet--blue">
+                    </div>
+                    <div class="room__entrance">
+                    </div>
+                    <div class="room__workspace">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
