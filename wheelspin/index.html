@@ -294,33 +294,55 @@
           }
         }
 
+        // Sort (TODO: tried a custom sort() first but couldn't get it to work properly. This is not perfect, try to find better way later)
+        let sortedEntries = [];
+        entries.forEach((entry, index) => {
+          const count = parseInt(entry.count);
+
+          if (count > 0) {
+            for (let i = 0; i < count; i++) {
+              const placeholderIndex = sortedEntries.findIndex((x) => x.id === -1 && x.idBefore !== index);
+
+              if (placeholderIndex >= 0) {
+                // Try to move into placeholder first
+                sortedEntries[placeholderIndex] = {id: index, ...entry};
+              } else {
+                // Else move it to the back
+                if (sortedEntries.length > 0 && sortedEntries[sortedEntries.length - 1].id === index) {
+                  // If needed, create a placeholder in front of it for others to fill in
+                  sortedEntries.push({id: -1, idBefore: index});
+                }
+                sortedEntries.push({id: index, ...entry});
+              }
+            }
+          }
+        });
+
+        // Remove remaining placeholders
+        sortedEntries = sortedEntries.filter((entry) => entry.id !== -1);
+
         let width = 2 * (wheelWidth / 2) * Math.tan(Math.PI / total);
         let left = (wheelWidth - width) / 2;
         let rotationIncrease = 360 / total;
         let rotation = 0;
 
-        entries.forEach((entry) => {
-          const count = parseInt(entry.count);
-          if (count > 0) {
-            for (let i = 0; i < count; i++) {
-              const spokeEl = document.createElement("div");
-              spokeEl.classList.add("spoke");
-              spokeEl.style.transform = "rotate(" + rotation + "deg)";
-              spokeEl.style.background = entry.background;
-              spokeEl.style.width = width + "px";
-              spokeEl.style.left = left + "px";
+        sortedEntries.forEach((entry) => {
+          const spokeEl = document.createElement("div");
+          spokeEl.classList.add("spoke");
+          spokeEl.style.transform = "rotate(" + rotation + "deg)";
+          spokeEl.style.background = entry.background;
+          spokeEl.style.width = width + "px";
+          spokeEl.style.left = left + "px";
 
-              if (entry.text) {
-                const textEl = document.createElement("span");
-                textEl.innerText = entry.text;
-                spokeEl.appendChild(textEl);
-              }
-
-              wheelEl.appendChild(spokeEl);
-
-              rotation += rotationIncrease;
-            }
+          if (entry.text) {
+            const textEl = document.createElement("span");
+            textEl.innerText = entry.text;
+            spokeEl.appendChild(textEl);
           }
+
+          wheelEl.appendChild(spokeEl);
+
+          rotation += rotationIncrease;
         });
       };
 
