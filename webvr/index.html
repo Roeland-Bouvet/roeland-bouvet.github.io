@@ -8,7 +8,24 @@
 </head>
 
 <body>
-  <a-scene>
+  <script>
+    let songPlayed = false;
+
+    AFRAME.registerComponent('monolith', {
+      init: function () {
+        const soundEl = document.getElementById('2001');
+
+        this.el.addEventListener('click', function (evt) {
+          if (!songPlayed) {
+            songPlayed = true;
+            soundEl.play();
+          }
+        });
+      }
+    });
+  </script>
+
+  <a-scene loading-screen="dotsColor: white; backgroundColor: black">
     <!-- Listing all assests to be used -->
     <a-assets>
       <img id="rg" src="images/rg.png">
@@ -23,6 +40,10 @@
      <!-- Setting up the camera -->
     <a-entity id="rig" position="-2 0 -5">
       <a-camera id="camera">
+        <a-entity cursor="fuse: true; fuseTimeout: 10"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+            material="color: white; shader: flat; opacity:0">
       </a-camera>
     </a-entity>
 
@@ -32,7 +53,7 @@
 
     <!-- Adding objects to the world -->
     <a-text position="0 0.5 -10.15" value="Made in China" color="white" width="1.5" rotation="0 180 0"></a-text>
-    <a-box position="0 2 -10" rotation="0 0 0" width="1.5" height="4" depth="0.3" color="#171718" metalness="1" shadow="cast: true"></a-box>
+    <a-box monolith position="0 2 -10" rotation="0 0 0" width="1.5" height="4" depth="0.3" color="#171718" metalness="1" shadow="cast: true"></a-box>
     <a-sphere position="0 1.25 5" radius="1.25" rotation="0 145 0" src="#rg" shadow="cast: true"></a-sphere>
 
     <!-- Setting ground and sky -->
@@ -41,19 +62,6 @@
     <!-- <a-sky color="#8ecdff"></a-sky> -->
     <!-- <a-plane position="0 0 0" rotation="-90 0 0" width="200" height="200" color="#df916d" roughness="1" shadow="receive: true"></a-plane> -->
   </a-scene>
-  <script>
-    //Doesn't work, figure out later
-    let soundPlaying = false;
-    const soundEl = document.getElementById('2001');
-    const cameraEl = document.getElementById('camera');
-    cameraEl.addEventListener('componentchanged', (evt) => {
-      if (!soundPlaying && (evt.name === 'rotation' || evt.name === 'position')) {
-        soundPlaying = true;
-        soundEl.play();
-      }
-      return;
-    });
-  </script>
 </body>
 
 </html>
