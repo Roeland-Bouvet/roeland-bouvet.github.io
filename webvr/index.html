@@ -12,6 +12,7 @@
     <!-- Listing all assests to be used -->
     <a-assets>
       <img id="philipp" src="images/philipp.png">
+      <img id="handwave" src="images/handwave.png">
       <img id="sky" src="images/sky.jpg">
       <img id="ground" src="images/ground.jpg">
       <img id="water" src="images/water.jpg">
@@ -27,10 +28,10 @@
      <!-- Setting up the camera -->
     <a-entity id="rig" position="-2 0 -3" rotation="0 0 0">
       <a-camera id="camera">
-        <a-entity cursor="fuse: true; fuseTimeout: 250"
+        <a-entity cursor="fuse: true; fuseTimeout: 100"
             position="0 0 -1"
             geometry="primitive: ring; radiusInner: 0; radiusOuter: 0"
-            raycaster="far: 50; interval: 250; objects: .clickable">
+            raycaster="far: 100; interval: 200; objects: .clickable">
       </a-camera>
     </a-entity>
 
@@ -45,7 +46,14 @@
       animation__rotate="property: rotation; to: 0 0 0; startEvents: rotateBoat; delay: 0; dur: 10000; autoplay: false"
       animation__move="property: position; to: 2 -0.025 100; startEvents: moveBoat; delay: 0; dur: 200000; autoplay: false"
     >
-      <a-box src="#philipp" width="1" height="1" depth="0" position="10 100 -100" scale="100 100 100" rotation="0 20 0" transparent="true"></a-box>
+      <a-box src="#philipp" width="1" height="1" depth="0" position="10 100 -100" scale="100 100 100" rotation="0 20 0" transparent="true">
+        <a-box material="visible: false" width="0.15" height="0.8" depth="0" position="-0.35 -0.6 0" rotation="0 0 10"
+        animation="property: rotation; from: 0 0 10; to: 0 0 -10; dur: 1500; easing: linear; loop: true; dir:alternate"
+        >
+          <a-box material="color: #0e0e0d" width="0.15" height="0.4" depth="0" position="0 0.4 -0.01"></a-box>
+          <a-box src="#handwave" width="0.25" height="0.25" depth="0" position="0 0.7 -0.015" rotation="0 0 -25" transparent="true"></a-box>
+        </a-box>
+      </a-box>
     </a-gltf-model>
 
     <!-- Setting ground and sky -->
