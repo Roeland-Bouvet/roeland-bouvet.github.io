@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Physics yeah!</title>
+  </head>
+  <body>
+    <div id="canvas" class="canvas">
+    </div>
+    <div class="controls">
+      <table>
+        <tr>
+          <td>Velocity:</td>
+          <td><input id="velocityInput" type="number" min="0" step="0.1" value="0.8"></td>
+          <td>px/s</td>
+        </tr>
+        <tr>
+          <td>Angle:</td>
+          <td><input id="angleInput" type="number" min="0" max="1.5" step="0.1" value="1"></td>
+          <td>radian</td>
+        </tr>
+        <tr>
+          <td>Gravity:</td>
+          <td><input id="gravityInput" type="number" min="0" max="1" step="0.0001" value="0.001"></td>
+          <td>px/s</td>
+        </tr>
+        <tr>
+          <td>Bounce:</td>
+          <td><input id="bounceInput" type="number" min="0" max="3" step="0.1" value="0.8"></td>
+          <td>% velocity inherited</td>
+        </tr>
+      </table>
+      <br>
+      <button id="resetButton">Reset values</button>
+    </div>
+    <style>
+      .canvas {
+        background: black;
+        height: 500px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .controls {
+        padding: 20px 0 0 0;
+      }
+
+      input {
+        width: 70px;
+      }
+
+      .ball {
+        position: absolute;
+        background: white;
+        height: 20px;
+        width: 20px;
+        border-radius: 100%;
+      }
+    </style>
+
+    <script>
+      // Variables
+      let angle = 1; // radian angle
+      let velocity = 0.8; // px/s
+      let gravity = 0.001 // px/s
+      let bounce = 0.8 // remaining speed after bounce (%)
+      let ballsMax = 1;
+      let balls = [];
+      let animate = false;
+      let timeStart = 0
+      let timePrevious = 0;
+
+      // Html elements
+      const canvasEl = document.getElementById("canvas");
+      const velocityInputEl = document.getElementById("velocityInput");
+      const angleInputEl = document.getElementById("angleInput");
+      const gravityInputEl = document.getElementById("gravityInput");
+      const bounceInputEl = document.getElementById("bounceInput");
+      const resetButtonEl = document.getElementById("resetButton");
+
+      // Input events
+      velocityInputEl.addEventListener("change", (event) => {
+        velocity = event.target.value;
+      });
+
+      angleInputEl.addEventListener("change", (event) => {
+        angle = event.target.value;
+      });
+
+      gravityInputEl.addEventListener("change", (event) => {
+        gravity = event.target.value;
+      });
+
+      bounceInputEl.addEventListener("change", (event) => {
+        bounce = event.target.value;
+      });
+
+      resetButtonEl.addEventListener("click", () => {
+        location.reload();
+      });
+
+      // Functions
+      const getRandom = (array) => {
+        return array[Math.floor(Math.random() * array.length)];
+      };
+
+      const createElement = () => {
+        const element = document.createElement("div");
+        element.classList.add("ball");
+        element.style.left = 0;
+        element.style.bottom = 0;
+        canvasEl.appendChild(element);
+
+        return element;
+      }
+
+      const animateBall = (timeCurrent) => {
+        // requestAnimationFrame repeats at monitor refresh rate
+        // Use timestamps to control the speed of animation
+        if (timeStart === 0) {
+          timeStart = timeCurrent;
+        }
+
+        // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
+        // Only animate once per frame
+        if (timePrevious !== timeCurrent) {
+          // Get canvas size
+          const canvasWidth = canvasEl.clientWidth;
+          const canvasHeight = 500;
+
+          // Add new balls until maximum
+          if (balls.length < ballsMax) {
+            balls.push({
+              timeCreated: timeCurrent,
+              element: createElement(),
+              x: 0,
+              y: 0,
+              velocity: velocity,
+              angle: angle,
+              delete: false
+            });
+          }
+
+          // Update all ball positions
+          balls.forEach((ball) => {
+            // 57.296° × π/180 = 1rad
+            // x = (v0 cosθ0)t
+            // y = (v0 sinθ0)t – 1/2 gt2
+
+            // Calculate new positions
+            const time = timeCurrent - ball.timeCreated;
+            const positionX = ball.x + (ball.velocity * Math.cos(ball.angle) * time);
+            const positionY = ball.y + (((ball.velocity * Math.sin(ball.angle) * time) - (0.5 * gravity * Math.pow(time, 2))) * -1);
+
+            ball.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
+
+            if (positionX < 0 || positionX >= canvasWidth) {
+              // Remove the ball if it goes off canvas
+              ball.delete = true;
+              ball.element.remove();
+            } else if (positionY > 0) {
+              // Bounce the ball if it hits the floor
+              ball.velocity = ball.velocity * bounce;
+
+              // If new velocity is smaller than a cutoff value, then just make it stop
+              if (ball.velocity < 0.01) {
+                ball.delete = true;
+                ball.element.remove();
+              } else {
+                // Create a new bounce curve by resetting initial time time and X/Y positions and using the new velocity
+                ball.timeCreated = timeCurrent;
+                ball.x = positionX;
+                ball.y = positionY;
+              }
+            }
+          });
+
+          // Delete removed balls from array
+          balls = balls.filter((ball) => !ball.delete);
+        }
+
+        if (animate) {
+          // Keep animation going
+          timePrevious = timeCurrent;
+          window.requestAnimationFrame(animateBall);
+        } else {
+          // Remove all balls and reset variables
+          balls.forEach((ball) => {
+            ball.element.remove();
+          });
+          balls = [];
+
+          // Reset variables
+          timeStart = 0;
+          timePrevious = 0;
+        }
+      }
+
+      const initPhysics = () => {
+        animate = true;
+        window.requestAnimationFrame(animateBall);
+      };
+
+      if (document.readyState !== "loading") {
+        initPhysics();
+      } else {
+        window.addEventListener("DOMContentLoaded", () => {
+          initPhysics();
+        });
+      }
+    </script>
+  </body>
+</html>
