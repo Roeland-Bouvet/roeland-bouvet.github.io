@@ -10,14 +10,14 @@
     <div class="controls">
       <table>
         <tr>
-          <td>Velocity:</td>
-          <td><input id="velocityInput" type="number" min="0" step="0.1" value="0.8"></td>
-          <td>px/s</td>
-        </tr>
-        <tr>
           <td>Angle:</td>
           <td><input id="angleInput" type="number" min="0" max="1.5" step="0.1" value="1"></td>
           <td>radian</td>
+        </tr>
+        <tr>
+          <td>Velocity:</td>
+          <td><input id="velocityInput" type="number" min="0" step="0.1" value="0.8"></td>
+          <td>px/s</td>
         </tr>
         <tr>
           <td>Gravity:</td>
@@ -31,12 +31,12 @@
         </tr>
       </table>
       <br>
-      <button id="resetButton">Reset values</button>
+      <button id="resetValues">Reset values</button>&nbsp;<button id="restartAnimation">Restart animation</button>
     </div>
     <style>
       .canvas {
         background: black;
-        height: 500px;
+        height: 800px;
         position: relative;
         overflow: hidden;
       }
@@ -62,29 +62,30 @@
       // Variables
       let angle = 1; // radian angle
       let velocity = 0.8; // px/s
-      let gravity = 0.001 // px/s
-      let bounce = 0.8 // remaining speed after bounce (%)
+      let gravity = 0.001; // px/s
+      let bounce = 0.8; // remaining speed after bounce (%)
       let ballsMax = 1;
       let balls = [];
       let animate = false;
-      let timeStart = 0
+      let timeStart = 0;
       let timePrevious = 0;
 
       // Html elements
       const canvasEl = document.getElementById("canvas");
-      const velocityInputEl = document.getElementById("velocityInput");
       const angleInputEl = document.getElementById("angleInput");
+      const velocityInputEl = document.getElementById("velocityInput");
       const gravityInputEl = document.getElementById("gravityInput");
       const bounceInputEl = document.getElementById("bounceInput");
-      const resetButtonEl = document.getElementById("resetButton");
+      const resetValuesEl = document.getElementById("resetValues");
+      const restartAnimationEl = document.getElementById("restartAnimation");
 
       // Input events
-      velocityInputEl.addEventListener("change", (event) => {
-        velocity = event.target.value;
-      });
-
       angleInputEl.addEventListener("change", (event) => {
         angle = event.target.value;
+      });
+
+      velocityInputEl.addEventListener("change", (event) => {
+        velocity = event.target.value;
       });
 
       gravityInputEl.addEventListener("change", (event) => {
@@ -95,8 +96,22 @@
         bounce = event.target.value;
       });
 
-      resetButtonEl.addEventListener("click", () => {
-        location.reload();
+      resetValuesEl.addEventListener("click", () => {
+        angle = 1;
+        velocity = 0.8;
+        gravity = 0.001;
+        bounce = 0.8;
+        angleInputEl.value = angle;
+        velocityInputEl.value = velocity;
+        gravityInputEl.value = gravity;
+        bounceInputEl.value = bounce;
+      });
+
+      restartAnimationEl.addEventListener("click", () => {
+        balls.forEach((ball) => {
+          ball.element.remove();
+        });
+        balls = [];
       });
 
       // Functions
@@ -126,53 +141,85 @@
         if (timePrevious !== timeCurrent) {
           // Get canvas size
           const canvasWidth = canvasEl.clientWidth;
-          const canvasHeight = 500;
+          const canvasHeight = 800;
 
           // Add new balls until maximum
           if (balls.length < ballsMax) {
             balls.push({
               timeCreated: timeCurrent,
               element: createElement(),
+              x0: 0,
+              y0: 0,
               x: 0,
               y: 0,
-              velocity: velocity,
               angle: angle,
+              velocity: velocity,
               delete: false
             });
           }
 
           // Update all ball positions
           balls.forEach((ball) => {
-            // 57.296° × π/180 = 1rad
+            // 360° = 2*Pi rad
+            // 1 rad = 57.296°
             // x = (v0 cosθ0)t
             // y = (v0 sinθ0)t – 1/2 gt2
+            // vx = v * cosθ
+            // vy = v * sinθ
+            // θ = tan-1 * (vy/ vx)
+            // var angleRad = Math.atan((ay-by)/(ax-bx));
+            // var angleDeg = angleRad * 180 / Math.PI;
 
-            // Calculate new positions
+            // Calculate new position
             const time = timeCurrent - ball.timeCreated;
-            const positionX = ball.x + (ball.velocity * Math.cos(ball.angle) * time);
-            const positionY = ball.y + (((ball.velocity * Math.sin(ball.angle) * time) - (0.5 * gravity * Math.pow(time, 2))) * -1);
+            const positionX = ball.x0 + (ball.velocity * Math.cos(ball.angle) * time);
+            let positionY = ball.y0 + (((ball.velocity * Math.sin(ball.angle) * time) - (0.5 * gravity * Math.pow(time, 2))) * -1);
+            positionY = positionY > 0 ? 0 : positionY;
 
-            ball.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
-
-            if (positionX < 0 || positionX >= canvasWidth) {
-              // Remove the ball if it goes off canvas
+            // Handle bounces
+            if (positionX < -100 || positionX > (canvasWidth + 100) ) {
+              // Remove the ball if it happens to go off canvas
               ball.delete = true;
               ball.element.remove();
-            } else if (positionY > 0) {
-              // Bounce the ball if it hits the floor
+
+            } else if (positionX >= canvasWidth - 20) {
+              // Bounce against the wall
               ball.velocity = ball.velocity * bounce;
 
+              // Get current angle and find reflection angle
+              const currentAngle = Math.atan((ball.y-positionY)/(ball.x-positionX));
+              const reflectedAngle = currentAngle + Math.PI;
+              console.log("Current angle: " + currentAngle);
+              console.log("Reflected angle: " + reflectedAngle);
+
+              // Create a new bounce curve
+              ball.angle = reflectedAngle;
+              ball.timeCreated = timeCurrent;
+              ball.x0 = positionX;
+              ball.y0 = positionY;
+            } else if (positionY >= 0) {
+              // Bounce against the floor
+              ball.velocity = ball.velocity * bounce;
+
+              console.log("Current angle: " + ball.angle);
+
               // If new velocity is smaller than a cutoff value, then just make it stop
-              if (ball.velocity < 0.01) {
+              if (ball.velocity < 0.005) {
                 ball.delete = true;
                 ball.element.remove();
               } else {
-                // Create a new bounce curve by resetting initial time time and X/Y positions and using the new velocity
+                // Create a new bounce curve
                 ball.timeCreated = timeCurrent;
-                ball.x = positionX;
-                ball.y = positionY;
+                ball.x0 = positionX;
+                ball.y0 = positionY;
               }
             }
+
+            // Save and update position
+            ball.x = positionX;
+            ball.y = positionY;
+
+            ball.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
           });
 
           // Delete removed balls from array
