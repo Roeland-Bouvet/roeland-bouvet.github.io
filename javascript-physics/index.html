@@ -222,6 +222,8 @@
 
             // Create a new bounce curve
             // If the current angle is downwards (rad < 0), find the positive reflection angle, otherwise keep using the same angle for each bounce
+            // TODO: To be correct we should always calculate the new angle, to account for the Y position of the last bounce curve origin, and to allow for other stuff later (wind resistance).
+            // TODO: But the calculation used for wall bounces has some weird outlier behavior sometimes that needs fixing, so visually reusing the previous bounce angle looks good enough for now.
             ball.angle = ball.angle < 0 ? (ball.angle *-1) : ball.angle;
             ball.timeCreated = timeCurrent;
             ball.x0 = positionX;
