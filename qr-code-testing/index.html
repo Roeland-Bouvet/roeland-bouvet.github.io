@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR testing</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  </head>
+  <body>
+    <h1>Testing QR scanner</h1>
+    <div style="max-width: 500px; height: 500px; margin: auto; padding: 5px; background-color: beige;">
+      <div id="reader"></div>
+    </div>
+    <script>
+      let html5QrCode;
+
+      function onScanSuccess(decodedText, decodedResult) {
+        // handle the scanned code as you like, for example:
+        console.log(`Code matched = ${decodedText}`, decodedResult);
+        html5QrcodeScanner.clear();
+      }
+
+      function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+        // for example:
+        // console.warn(`Code scan error = ${error}`);
+      }
+
+      // Square QR box with edge size = 85% of the smaller edge of the viewfinder.
+      let qrboxFunction = function(viewfinderWidth, viewfinderHeight) {
+          let minEdgePercentage = 0.85;
+          let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+          let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+          return {
+              width: qrboxSize,
+              height: qrboxSize
+          };
+      }
+
+      function startQrcodeScanner() {
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 2, qrbox: qrboxFunction },
+        /* verbose= */ false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+      }
+
+      function startQrcode() {
+        html5QrCode = new Html5Qrcode(
+          "reader", { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
+        const config = { fps: 5, qrbox: qrboxFunction };
+
+        html5QrCode.start({ facingMode: "user" }, config, onScanSuccess);
+      }
+
+      startQrcode();
+    </script>
+  </body>
+</html>
