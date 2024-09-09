@@ -20,14 +20,8 @@
       <img id="skyImg" src="images/skybox2.jpg">
       <img id="groundImg" src="images/ground.jpg">
       <img id="waterImg" src="images/water.jpg">
-      <audio id="2001Mp3" src="sounds/2001.mp3" preload="auto"></audio>
-      <audio id="titanicMp3" src="sounds/titanic.mp3" preload="auto"></audio>
       <a-asset-item id="boat" src="models/boat/scene.gltf"></a-asset-item>
     </a-assets>
-
-    <!-- Audio -->
-    <a-sound id="2001" src="#2001Mp3" position="0 2 -10" volume="1"></a-sound>
-    <a-sound id="titanic" src="#titanicMp3" position="0 2 -10" volume="1"></a-sound>
 
      <!-- Setting up the camera -->
     <a-entity id="rig" position="-2 0 -3" rotation="0 0 0">
@@ -83,8 +77,10 @@
   </a-scene>
 
   <script>
-    const sound2001El = document.getElementById('2001');
-    const soundTitanicEl = document.getElementById('titanic');
+    const sound2000 = new Audio("sounds/2001.mp3");
+    const soundTitanic = new Audio("sounds/titanic.mp3");
+    sound2000.volume = 0.5;
+    soundTitanic.volume = 0.5;
     let songPlaying = "";
     let boatMoving = false;
 
@@ -93,8 +89,8 @@
         this.el.addEventListener('click', function (evt) {
           if (songPlaying !== "2001") {
             songPlaying = "2001";
-            soundTitanicEl.pause();
-            sound2001El.play();
+            soundTitanic.pause();
+            sound2000.play();
           }
         });
       }
@@ -111,8 +107,8 @@
           }
           if (songPlaying !== "titanic") {
             songPlaying = "titanic";
-            sound2001El.pause();
-            soundTitanicEl.play();
+            sound2000.pause();
+            soundTitanic.play();
           }
         });
       }
