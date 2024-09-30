@@ -206,8 +206,8 @@
             element: createElement(),
             x0: 0,
             y0: 0,
-            x: 0,
-            y: 0,
+            x: [0],
+            y: [0],
             angle: angle,
             velocity: velocity,
             gravity: gravity,
@@ -249,7 +249,7 @@
 
             // Get the current angle of the vector made from the previous and current position
             // Find reflection angle for upwards (rad > 0) and downwards (rad < 0) angles
-            const currentAngle = Math.atan((positionY - ball.y) / (positionX - ball.x));
+            const currentAngle = Math.atan((positionY - ball.y[0]) / (positionX - ball.x[0]));
             const reflectedAngle = currentAngle > 0 ? (Math.PI - currentAngle) : (Math.PI + currentAngle) * -1;
 
             // Create a new bounce curve
@@ -263,7 +263,7 @@
             ball.velocity = ball.velocity * ball.bounce;
 
             // Get current angle and find reflection angle
-            const currentAngle = Math.atan((ball.y - positionY) / (ball.x - positionX));
+            const currentAngle = Math.atan((ball.y[0] - positionY) / (ball.x[0] - positionX));
             const reflectedAngle = currentAngle * -1;
 
             // Create a new bounce curve
@@ -286,8 +286,16 @@
           }
 
           // Save and update position
-          ball.x = positionX;
-          ball.y = positionY;
+          if (ball.x.length >= 3) {
+            ball.x.shift();
+          }
+
+          if (ball.y.length >= 3) {
+            ball.y.shift();
+          }
+
+          ball.x.push(positionX);
+          ball.y.push(positionY);
           ball.element.style.transform = `translate(${positionX}px, ${positionY * -1}px)`;
 
           // If velocity is smaller than a cutoff value, make it stop
