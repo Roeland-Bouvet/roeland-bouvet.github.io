@@ -13,42 +13,54 @@
     <table>
       <tr>
         <td>Angle:</td>
-        <td><input id="angleInput" type="number" min="0" max="1.5" step="0.1" value="1"></td>
+        <td><input id="angleInput" type="range" min="0" max="1.5" step="0.1"></td>
+        <td id="angleOutput"></td>
         <td>radian</td>
       </tr>
       <tr>
         <td>Velocity:</td>
-        <td><input id="velocityInput" type="number" min="0" step="0.1" value="0.8"></td>
+        <td><input id="velocityInput" type="range" min="0" max="3000" step="1"></td>
+        <td id="velocityOutput"></td>
         <td>px/s</td>
       </tr>
       <tr>
         <td>Gravity:</td>
-        <td><input id="gravityInput" type="number" min="0" max="1" step="0.0001" value="0.001"></td>
-        <td>px/s</td>
+        <td><input id="gravityInput" type="range" min="0" max="5000" step="1"></td>
+        <td id="gravityOutput"></td>
+        <td>px/s<sup>2</sup></td>
       </tr>
       <tr>
         <td>Bounce:</td>
-        <td><input id="bounceInput" type="number" min="0" max="3" step="0.1" value="0.8"></td>
-        <td>% velocity inherited</td>
+        <td><input id="bounceInput" type="range" min="0" max="2" step="0.1"></td>
+        <td id="bounceOutput"></td>
+        <td>%</td>
       </tr>
     </table>
-    <br>
     <button id="resetValues">Reset values</button>&nbsp;<button id="restartAnimation">Restart animation</button>
   </div>
   <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+
     .canvas {
+      flex: 1;
       background: black;
-      height: 800px;
       position: relative;
       overflow: hidden;
     }
 
     .controls {
-      padding: 20px 0 0 0;
+      flex: 0 0 auto;
+      padding: 15px;
+      background-color: #dddddd;
     }
 
     input {
-      width: 70px;
+      width: 100px;
     }
 
     .ball {
@@ -58,14 +70,22 @@
       width: 20px;
       border-radius: 100%;
     }
+
+    button {
+      margin: 15px 15px 0 0;
+    }
   </style>
 
   <script>
     // Variables
-    let angle = 1; // radian angle
-    let velocity = 0.8; // px/s
-    let gravity = 0.001; // px/s
-    let bounce = 0.8; // remaining speed after bounce (%)
+    const angleDefault = 0.75; // radian angle
+    const velocityDefault = 1000; // px/s
+    const gravityDefault = 1500; // px/s2
+    const bounceDefault = 0.8; // velocity inherited after bounce (%)
+    let angle;
+    let velocity;
+    let gravity;
+    let bounce;
     let ballsMax = 1;
     let balls = [];
     let animate = false;
@@ -75,38 +95,39 @@
     // Html elements
     const canvasEl = document.getElementById("canvas");
     const angleInputEl = document.getElementById("angleInput");
+    const angleOutputEl = document.getElementById("angleOutput");
     const velocityInputEl = document.getElementById("velocityInput");
+    const velocityOutputEl = document.getElementById("velocityOutput");
     const gravityInputEl = document.getElementById("gravityInput");
+    const gravityOutputEl = document.getElementById("gravityOutput");
     const bounceInputEl = document.getElementById("bounceInput");
+    const bounceOutputEl = document.getElementById("bounceOutput");
     const resetValuesEl = document.getElementById("resetValues");
     const restartAnimationEl = document.getElementById("restartAnimation");
 
     // Input events
     angleInputEl.addEventListener("change", (event) => {
       angle = event.target.value;
+      angleOutputEl.innerHTML = angle;
     });
 
     velocityInputEl.addEventListener("change", (event) => {
       velocity = event.target.value;
+      velocityOutputEl.innerHTML = velocity;
     });
 
     gravityInputEl.addEventListener("change", (event) => {
       gravity = event.target.value;
+      gravityOutputEl.innerHTML = gravity;
     });
 
     bounceInputEl.addEventListener("change", (event) => {
       bounce = event.target.value;
+      bounceOutputEl.innerHTML = bounce;
     });
 
     resetValuesEl.addEventListener("click", () => {
-      angle = 1;
-      velocity = 0.8;
-      gravity = 0.001;
-      bounce = 0.8;
-      angleInputEl.value = angle;
-      velocityInputEl.value = velocity;
-      gravityInputEl.value = gravity;
-      bounceInputEl.value = bounce;
+      resetValues();
     });
 
     restartAnimationEl.addEventListener("click", () => {
@@ -117,6 +138,21 @@
     });
 
     // Functions
+    const resetValues = () => {
+      angle = angleDefault;
+      velocity = velocityDefault;
+      gravity = gravityDefault;
+      bounce = bounceDefault;
+      angleInputEl.value = angle;
+      angleOutputEl.innerHTML = angle;
+      velocityInputEl.value = velocity;
+      velocityOutputEl.innerHTML = velocity;
+      gravityInputEl.value = gravity;
+      gravityOutputEl.innerHTML = gravity;
+      bounceInputEl.value = bounce;
+      bounceOutputEl.innerHTML = bounce;
+    }
+
     const getRandom = (array) => {
       return array[Math.floor(Math.random() * array.length)];
     };
@@ -142,9 +178,9 @@
       // Only animate once per frame
       if (timePrevious !== timeCurrent) {
         // Get canvas size and set bounce positions
-        const maxBallPostionX = canvasEl.clientWidth - 18; // Point where ball bounces on right wall
-        const minBallPostionX = -2; // Point where ball bounces on left wall
-        const minBallPostionY = -2; // Point where ball bounces on the floor
+        const maxBallPostionX = canvasEl.clientWidth - 19; // Point where ball bounces on right wall (minus size of object)
+        const minBallPostionX = -1; // Point where ball bounces on left wall
+        const minBallPostionY = -1; // Point where ball bounces on the floor
 
         // Add new balls until maximum
         if (balls.length < ballsMax) {
@@ -173,8 +209,8 @@
           // var angleRad = Math.atan((ay-by)/(ax-bx));
           // var angleDeg = angleRad * 180 / Math.PI;
 
-          // Calculate new position
-          const time = timeCurrent - ball.timeCreated;
+          // Calculate new position (projectile motion equations)
+          const time = (timeCurrent - ball.timeCreated) / 1000;
           let positionX = ball.x0 + (ball.velocity * Math.cos(ball.angle) * time);
           let positionY = ball.y0 + ((ball.velocity * Math.sin(ball.angle) * time) - (0.5 * gravity * Math.pow(time, 2)));
 
@@ -265,16 +301,11 @@
 
     const initPhysics = () => {
       animate = true;
+      resetValues();
       window.requestAnimationFrame(animateBall);
     };
 
-    if (document.readyState !== "loading") {
-      initPhysics();
-    } else {
-      window.addEventListener("DOMContentLoaded", () => {
-        initPhysics();
-      });
-    }
+    initPhysics();
   </script>
 </body>
 
