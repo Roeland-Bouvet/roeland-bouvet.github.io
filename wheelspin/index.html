@@ -3,17 +3,17 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8">
-    <title>Wheel of fortune</title>
+    <title>Wheel of Fortune</title>
     <link rel="icon" href="wheel-favicon.png" />
   </head>
   <body>
-    <h1>Wheel of fortune</h1>
+    <h1>Wheel of Fortune</h1>
     <main>
       <div class="list-panel">
         <div id="entryList" class="list-entries">
         </div>
-        <button id="btnAdd">Add entry</button>
-        <button id="btnSave">Save</button>
+        <button id="btnAdd">Add row</button>
+        <button id="btnSave">&#128190; Save</button>
       </div>
       <div class="action-panel">
         <div class="frame">
@@ -44,7 +44,10 @@
       }
 
       h1 {
-        margin-top: 0;
+        display: block;
+        padding: 0 0 10px 0;
+        margin: 0 0 20px 0;
+        border-bottom: 2px solid #11133c;
       }
 
       button {
@@ -63,16 +66,16 @@
       }
 
       .list-panel {
-        padding: 0 30px 30px 0;
+        padding: 0 30px 15px 0;
         flex: 0 0 300px;
       }
 
       .list-panel button {
-        margin: 0 15px 15px 0;
+        margin: 0 0 15px 0;
       }
 
       .list-entries {
-        margin-bottom: 15px;
+        margin-bottom: 5px;
       }
 
       .list-entries .inputfields {
@@ -92,6 +95,11 @@
         padding: 0 5px;
         margin: 0 0 0 3px;
         font-size: 10px;
+      }
+
+      #btnAdd {
+        display: block;
+        width: 100%;
       }
 
       .action-panel {
