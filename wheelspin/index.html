@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8">
     <title>Wheel of fortune</title>
+    <link rel="icon" href="wheel-favicon.png" />
   </head>
   <body>
     <h1>Wheel of fortune</h1>
@@ -17,8 +18,11 @@
       <div class="action-panel">
         <div class="frame">
           <div class="arrow"></div>
+          <div class="arrow arrow--core"></div>
           <div id="wheel" class="wheel"></div>
-          <button id="btnSpin">SPIN THE WHEEL!</button>
+          <button id="btnSpin">
+            <span>SPIN THE WHEEL!</span>
+          </button>
         </div>
       </div>
     </main>
@@ -45,12 +49,12 @@
 
       button {
         background: #11133c;
-        color: #fcf8f3;
+        color: white;
         border-radius: 5px;
         padding: 5px 10px;
-        border: 1px solid #11133c;
+        border: 0;
         cursor: pointer;
-        transition: all ease 200ms;
+        transition: background-color ease 200ms;
       }
 
       button:hover,
@@ -97,8 +101,57 @@
       }
 
       .action-panel button {
-        margin: 30px auto 0 auto;
         display: block;
+        position: relative;
+        margin: 30px auto 0 auto;
+        padding: 5px;
+        border: 2px solid white;
+        border-radius: 30px;
+        letter-spacing: 1px;
+        overflow: hidden;
+      }
+
+      .action-panel button:hover,
+      .action-panel button:focus-visible {
+        background: transparent;
+      }
+
+      .action-panel button span {
+        display: block;
+        padding: 10px;
+        border: 2px solid white;
+        border-radius: 30px;
+        background: #11133c;
+      }
+
+      .action-panel button:hover span,
+      .action-panel button:focus-visible span {
+        background: #2a2e78;
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: translate(-50%, -50%) rotate(0);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(1turn);
+        }
+      }
+
+      .action-panel button::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        left: 50%;
+        top: 50%;
+        aspect-ratio: 1;
+        width: 120%;
+        height: auto;
+        background-repeat: no-repeat;
+        background-image: url(button-background.png);
+        background-position: center;
+        background-size: 100%;
+        animation: rotate 5s linear infinite;
       }
 
       .frame {
@@ -109,19 +162,26 @@
         width: 20px;
         height: 30px;
         position: absolute;
-        left: 210px;
+        left: 245px;
         top: -15px;
-        background: black;
+        background: white;
         z-index: 999;
         clip-path: polygon(100% 0, 0 0, 50% 100%);
-        box-shadow: 10px 10px 20px -10px rgba(0,0,0,0.50);
+      }
+
+      .arrow--core {
+        width: 16px;
+        height: 24px;
+        background: black;
+        top: -14px;
+        left: 247px;
       }
 
       .wheel {
         display: inline-block;
         position: relative;
-        width: 440px;
-        height: 440px;
+        width: 510px;
+        height: 510px;
         background-color: #999;
         transition: transform cubic-bezier(0, 1.05, 1, 1) 10s;
         border-radius: 100%;
@@ -129,21 +189,20 @@
       }
 
       .spoke {
-        width: 220px;
-        height: 220px;
+        width: 255px;
+        height: 255px;
         position: absolute;
         display: flex;
         justify-content: center;
         align-items: center;
         clip-path: polygon(100% 0, 0 0, 50% 100%);
         transform-origin: 50% 100%;
-        bottom: 220px;
-        left: 110px;
+        bottom: 255px;
       }
 
       .spoke span {
         display: block;
-        width: 140px;
+        width: 160px;
         max-height: 40px;
         overflow: hidden;
         word-break: break-word;
@@ -151,7 +210,7 @@
         text-align: center;
         transform: rotate(-90deg);
         position: absolute;
-        bottom: 120px;
+        bottom: 130px;
         border-radius: 20px;
         color: white;
         background: rgba(0,0,0,0.20);
@@ -165,10 +224,15 @@
 
         .list-panel {
           padding-right: 0;
+          flex: 0 0 100%;
         }
 
         .arrow {
           left: 140px;
+        }
+
+        .arrow--core {
+          left: 142px;
         }
 
         .wheel {
