@@ -10,7 +10,22 @@
     <h1>Wheel of Fortune</h1>
     <main>
       <div class="list-panel">
-        <div id="entryList" class="list-entries">
+        <div class="list-tabs">
+          <button data-list="1" class="active">1</button>
+          <button data-list="2">2</button>
+          <button data-list="3">3</button>
+          <button data-list="4">4</button>
+          <button data-list="5">5</button>
+        </div>
+        <div data-list="1" class="list-entries active">
+        </div>
+        <div data-list="2" class="list-entries">
+        </div>
+        <div data-list="3" class="list-entries">
+        </div>
+        <div data-list="4" class="list-entries">
+        </div>
+        <div data-list="5" class="list-entries">
         </div>
         <button id="btnAdd">Add row</button>
         <button id="btnSave">&#128190;&nbsp;&nbsp;Save</button>
@@ -66,15 +81,39 @@
       }
 
       .list-panel {
-        padding: 0 30px 15px 0;
+        padding: 0 30px 0 0;
         flex: 0 0 300px;
       }
 
       .list-panel button {
-        margin: 0 0 15px 0;
+        margin: 0 0 20px 0;
+      }
+
+      .list-tabs {
+        border-bottom: 2px solid #11133c;
+        margin-bottom: 5px;
+      }
+
+      .list-tabs button {
+        transition: opacity ease 200ms;
+        opacity: 0.6;
+        margin-bottom: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+        width: 40px;
+      }
+
+      .list-tabs button.active {
+        opacity: 1;
       }
 
       .list-entries {
+        display: none;
+        margin-bottom: 5px;
+      }
+
+      .list-entries.active {
+        display: block;
         margin-bottom: 5px;
       }
 
@@ -271,75 +310,96 @@
       const btnAddEl = document.getElementById("btnAdd");
       const btnSaveEl = document.getElementById("btnSave");
       const btnSpinEl = document.getElementById("btnSpin");
-      const entryListEl = document.getElementById("entryList");
+      const tabsEl = document.querySelectorAll(".list-tabs button");
+      const listsEl = document.querySelectorAll(".list-entries");
 
       // Variables
-      let entries;
+      let lists;
+      let activeListId = "1";
       let rotationDeg = 0;
+      const defaultEntries = [
+        { text: "Pizza", background: "#bc0000", count: 1 },
+        { text: "Pasta", background: "#191970", count: 1 },
+        { text: "Taco", background: "#51a400", count: 1 },
+        { text: "Burger", background: "#800080", count: 1 },
+        { text: "Sushi", background: "#e29300", count: 1 }
+      ];
 
       // Functions
       const getRandom = (start, end) => {
         return Math.floor(Math.random() * (end - start + 1) + start);
       };
 
-      const loadEntries = () => {
+      const loadLists = () => {
         try {
-          const storedEntries = localStorage.getItem("entries");
-          if (storedEntries) {
-            entries = JSON.parse(storedEntries);
+          let storedLists = localStorage.getItem("lists");
+
+          if (storedLists) {
+            lists = JSON.parse(storedLists);
           } else {
-            // Set some default entries on first visit
-            entries = [
-              {text: "11:00", background: "#bc0000", count: 1},
-              {text: "11:15", background: "#191970", count: 1},
-              {text: "11:30", background: "#51a400", count: 1},
-              {text: "11:45", background: "#800080", count: 1},
-              {text: "12:00", background: "#e29300", count: 1}
-            ];
+            const oldEntries = localStorage.getItem("entries");
+
+            if (oldEntries) {
+              // Fallback for older storage
+              lists = [{
+                id: 1,
+                entries: JSON.parse(oldEntries)
+              }];
+            } else {
+              // Set some default entries on first visit
+              lists = [{
+                id: 1,
+                entries: defaultEntries
+              }];
+            }
           }
-        } catch(error) {
+        } catch (error) {
           console.log(error);
-          entries = [
-            {text: "11:00", background: "#bc0000", count: 1},
-            {text: "11:15", background: "#191970", count: 1},
-            {text: "11:30", background: "#51a400", count: 1},
-            {text: "11:45", background: "#800080", count: 1},
-            {text: "12:00", background: "#e29300", count: 1}
-          ];
+          lists = {
+            id: 1,
+            entries: defaultEntries
+          };
         }
 
-        entries.forEach((entry) => {
-          const wrapperEl = document.createElement("div");
-          wrapperEl.classList.add("inputfields");
+        lists.forEach((list) => {
+          list.entries.forEach((entry) => {
+            const wrapperEl = document.createElement("div");
+            wrapperEl.classList.add("inputfields");
 
-          const textEl = document.createElement("input");
-          textEl.type = "text";
-          textEl.value = entry.text;
+            const textEl = document.createElement("input");
+            textEl.type = "text";
+            textEl.value = entry.text;
 
-          const colorEl = document.createElement("input");
-          colorEl.type = "color";
-          colorEl.value = entry.background;
+            const colorEl = document.createElement("input");
+            colorEl.type = "color";
+            colorEl.value = entry.background;
 
-          const countEl = document.createElement("input");
-          countEl.type = "number";
-          countEl.min = "0";
-          countEl.value = entry.count;
+            const countEl = document.createElement("input");
+            countEl.type = "number";
+            countEl.min = "0";
+            countEl.value = entry.count;
 
-          const btnDeleteEl = document.createElement("button");
-          btnDeleteEl.innerHTML = "&#10006;";
+            const btnDeleteEl = document.createElement("button");
+            btnDeleteEl.innerHTML = "&#10006;";
 
-          btnDeleteEl.addEventListener('click', (event) => {
-            const wrapper = event.target.closest(".inputfields");
-            if (wrapper) {
-              wrapper.remove();
+            btnDeleteEl.addEventListener('click', (event) => {
+              const wrapper = event.target.closest(".inputfields");
+              if (wrapper) {
+                wrapper.remove();
+              }
+            });
+
+            wrapperEl.appendChild(textEl);
+            wrapperEl.appendChild(colorEl);
+            wrapperEl.appendChild(countEl);
+            wrapperEl.appendChild(btnDeleteEl);
+
+            const entryListEl = document.querySelector(`[data-list="${list.id}"].list-entries`);
+
+            if (entryListEl){
+              entryListEl.appendChild(wrapperEl);
             }
           });
-
-          wrapperEl.appendChild(textEl);
-          wrapperEl.appendChild(colorEl);
-          wrapperEl.appendChild(countEl);
-          wrapperEl.appendChild(btnDeleteEl);
-          entryListEl.appendChild(wrapperEl);
         });
       };
 
@@ -348,6 +408,7 @@
 
         const wheelWidth = wheelEl.clientWidth;
         let total = 0;
+        let entries = lists.filter((list) => list.id === activeListId)[0]?.entries || [];
 
         entries.forEach((entry) => {
           const count = parseInt(entry.count);
@@ -419,49 +480,81 @@
       };
 
       const loadEventListeners = () => {
-        btnAddEl.addEventListener('click', () => {
-          const wrapperEl = document.createElement("div");
-          wrapperEl.classList.add("inputfields");
+        tabsEl.forEach((tab) => {
+          tab.addEventListener('click', (event) => {
+            activeListId = event.currentTarget.dataset.list;
 
-          const textEl = document.createElement("input");
-          textEl.type = "text";
+            tabsEl.forEach((element) => {
+              if (element.dataset.list === activeListId) {
+                element.classList.add("active");
+              } else {
+                element.classList.remove("active");
+              }
+            });
 
-          const colorEl = document.createElement("input");
-          colorEl.type = "color";
+            listsEl.forEach((element) => {
+              if (element.dataset.list === activeListId) {
+                element.classList.add("active");
+              } else {
+                element.classList.remove("active");
+              }
+            });
 
-          const countEl = document.createElement("input");
-          countEl.type = "number";
-          countEl.min = "0";
-          countEl.value = "1";
-
-          const btnDeleteEl = document.createElement("button");
-          btnDeleteEl.innerHTML = "&#10006;";
-
-          btnDeleteEl.addEventListener('click', (event) => {
-            const wrapper = event.target.closest(".inputfields");
-            if (wrapper) {
-              wrapper.remove();
-            }
+            loadWheel();
           });
+        });
 
-          wrapperEl.appendChild(textEl);
-          wrapperEl.appendChild(colorEl);
-          wrapperEl.appendChild(countEl);
-          wrapperEl.appendChild(btnDeleteEl);
-          entryListEl.appendChild(wrapperEl);
+        btnAddEl.addEventListener('click', () => {
+          const entryListEl = document.querySelector(`[data-list="${activeListId}"].list-entries`);
 
-          textEl.focus();
+          if (entryListEl) {
+            const wrapperEl = document.createElement("div");
+            wrapperEl.classList.add("inputfields");
+
+            const textEl = document.createElement("input");
+            textEl.type = "text";
+
+            const colorEl = document.createElement("input");
+            colorEl.type = "color";
+
+            const countEl = document.createElement("input");
+            countEl.type = "number";
+            countEl.min = "0";
+            countEl.value = "1";
+
+            const btnDeleteEl = document.createElement("button");
+            btnDeleteEl.innerHTML = "&#10006;";
+
+            btnDeleteEl.addEventListener('click', (event) => {
+              const wrapper = event.target.closest(".inputfields");
+              if (wrapper) {
+                wrapper.remove();
+              }
+            });
+
+            wrapperEl.appendChild(textEl);
+            wrapperEl.appendChild(colorEl);
+            wrapperEl.appendChild(countEl);
+            wrapperEl.appendChild(btnDeleteEl);
+            entryListEl.appendChild(wrapperEl);
+            textEl.focus();
+          }
         });
 
         btnSaveEl.addEventListener('click', () => {
-          entries = [];
+          lists = [];
 
-          Array.from(entryListEl.children).forEach((child) => {
-            entries.push({text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)});
+          listsEl.forEach((list) => {
+            const listId = list.dataset.list;
+            const listEntries = Array.from(list.children).map((child) => {
+              return {text: child.children[0].value, background: child.children[1].value, count: parseInt(child.children[2].value)};
+            });
+
+            lists.push({id: listId, entries: listEntries});
           });
 
           try {
-            localStorage.setItem("entries", JSON.stringify(entries));
+            localStorage.setItem("lists", JSON.stringify(lists));
           } catch(error) {
             console.log(error);
           }
@@ -479,7 +572,7 @@
       };
 
       const initWheel = () => {
-        loadEntries();
+        loadLists();
         loadWheel();
         loadEventListeners();
       };
