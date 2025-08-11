@@ -342,13 +342,13 @@
             if (oldEntries) {
               // Fallback for older storage
               lists = [{
-                id: 1,
+                id: "1",
                 entries: JSON.parse(oldEntries)
               }];
             } else {
               // Set some default entries on first visit
               lists = [{
-                id: 1,
+                id: "1",
                 entries: defaultEntries
               }];
             }
@@ -356,7 +356,7 @@
         } catch (error) {
           console.log(error);
           lists = {
-            id: 1,
+            id: "1",
             entries: defaultEntries
           };
         }
