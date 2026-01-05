@@ -296,11 +296,11 @@
     .controls .button {
       flex: 1;
       text-align: center;
-      line-height: 40px;
+      line-height: 80px;
       border: 1px solid white;
       margin: 15px 0;
-      font-size: 20px;
-      height: 40px;
+      font-size: 28px;
+      height: 80px;
       -webkit-user-select: none; /* Safari */
       -ms-user-select: none; /* IE 10 and IE 11 */
       user-select: none; /* Standard syntax */
@@ -308,7 +308,7 @@
 
     .controls .button--center {
       margin: 15px;
-      font-size: 13px;
+      font-size: 18px;
     }
 
     .controls .button--pressed {
@@ -320,6 +320,10 @@
       .controls {
         display: flex;
       }
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 
@@ -416,7 +420,10 @@
       lifecountEl.innerText = "|||";
       countdownEl.innerText = gameTime;
       scoreEl.innerText = "0";
-      menuEl.style.display = "none";
+    };
+
+    const toggleMenu = () => {
+      menuEl.classList.toggle("hidden");
     };
 
     const pressDownHandler = (event) => {
@@ -471,8 +478,11 @@
         setTimeout(countdownTimer, 1000);
 
         // Spawn elements
-        spawnTarget(0);
+        spawnTarget(0, true);
         spawnGun(0);
+
+        // Hide menu
+        toggleMenu();
 
         // Start animation updates
         window.requestAnimationFrame(updateFrame);
@@ -581,7 +591,7 @@
           Accuracy bonus: + ${bonusAccScore}<br>
           Lives bonus: + ${bonusLivesScore}<br><br>
           <span class="subtitle">FINAL SCORE: ${finalscore}</span>`;
-        menuEl.style.display = "flex";
+        toggleMenu();
         resultsEl.style.display = "block";
         gameReadyToStart = true;
       }, 2000);
@@ -728,7 +738,7 @@
 
           // Destroy target and respawn it
           destroyTarget();
-          setTimeout(spawnTarget, spawnRate, 1500);
+          setTimeout(spawnTarget, spawnRate, 1500, false);
         }
 
         // Bullet continues unless it's hidden, in this case remove it from DOM
@@ -908,10 +918,15 @@
        }, 1000);
     };
 
-    const spawnTarget = (timeInvulnerable) => {
+    const spawnTarget = (timeInvulnerable, isCentered) => {
       if (gameActive) {
         targetDirection = getRandom([1,2]);
         targetEl.style.display = "block";
+
+        if (isCentered) {
+          targetPosition = (mainWidth / 2) - (targetWidth / 2);
+          targetEl.style.transform = `translateX(${targetPosition}px)`;
+        }
 
         if (timeInvulnerable > 0) {
           // Make target invulnerable when spawning in
