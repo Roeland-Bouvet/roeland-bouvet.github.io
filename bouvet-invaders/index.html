@@ -324,6 +324,24 @@
   </style>
 
   <script>
+    // Html elements
+    const mainEl = document.getElementById("main");
+    const menuEl = document.getElementById("menu");
+    const resultsEl = document.getElementById("results");
+    const lifecountEl = document.getElementById("lifecount");
+    const countdownEl = document.getElementById("countdown");
+    const scoreEl = document.getElementById("score");
+    const gunEl = document.getElementById("gun");
+    const heatEl = document.getElementById("heat");
+    const targetEl = document.getElementById("target");
+    const centralMessageEl = document.getElementById("centralMessage");
+    const speakerEl = document.getElementById("speaker");
+    const message1El = document.getElementById("message1");
+    const message2El = document.getElementById("message2");
+    const buttonLeftEl = document.getElementById("buttonLeft");
+    const buttonRightEl = document.getElementById("buttonRight");
+    const buttonFireEl = document.getElementById("buttonFire");
+
     // Global game constants
     const gameTime = 60; // total s per game
     const spawnRate = 1000; // ms delay before target respawns
@@ -340,7 +358,9 @@
     const gunHeatMax = 1000; // max level of heat
     const gunHeatAdd = 200; // heat added per shot fired
     const gunHeatReduceRate = 0.5; // heat removed/ms
-    const mainWidth = window.outerWidth > 532 ? 500 : window.outerWidth - 32;
+    const mainWidth = mainEl.clientWidth;
+    const targetWidth = 35;
+    const gunWidth = 40;
 
     // Variables
     let gameActive,
@@ -367,36 +387,18 @@
     bombs = [],
     bullets = [];
 
-    // Html elements
-    const mainEl = document.getElementById("main");
-    const menuEl = document.getElementById("menu");
-    const resultsEl = document.getElementById("results");
-    const lifecountEl = document.getElementById("lifecount");
-    const countdownEl = document.getElementById("countdown");
-    const scoreEl = document.getElementById("score");
-    const gunEl = document.getElementById("gun");
-    const heatEl = document.getElementById("heat");
-    const targetEl = document.getElementById("target");
-    const centralMessageEl = document.getElementById("centralMessage");
-    const speakerEl = document.getElementById("speaker");
-    const message1El = document.getElementById("message1");
-    const message2El = document.getElementById("message2");
-    const buttonLeftEl = document.getElementById("buttonLeft");
-    const buttonRightEl = document.getElementById("buttonRight");
-    const buttonFireEl = document.getElementById("buttonFire");
-
     // Functions
     const resetVariables = () => {
       gameActive = false;
       gameReadyToStart = false;
       countDown = gameTime;
       targetDirection = 0;
-      targetPosition = (mainWidth/2) - 20;
+      targetPosition = (mainWidth / 2) - (targetWidth / 2);
       targetInvulnerable = false;
       gunMovingLeft = false;
       gunMovingRight = false;
       gunFiring = false;
-      gunPosition = (mainWidth/2) - 20;
+      gunPosition = (mainWidth / 2) - (gunWidth / 2);
       gunHeat = 0;
       gunDisabled = false;
       gunInvulnerable = false;
@@ -469,7 +471,7 @@
         setTimeout(countdownTimer, 1000);
 
         // Spawn elements
-        spawnTarget(1500);
+        spawnTarget(0);
         spawnGun(0);
 
         // Start animation updates
@@ -586,25 +588,29 @@
     };
 
     const moveTarget = (timeDiff) => {
+      if (targetDirection === 0) {
+        return;
+      }
+
       if (targetDirection === 1) {
         targetPosition -= targetSpeed * timeDiff;
 
         if (targetPosition < 0) {
           // Change direction if edge of container is reached
-          targetDirection = 2
-        } else {
-          targetEl.style.transform = `translateX(${targetPosition}px)`;
+          targetDirection = 2;
+          targetPosition = 0;
         }
       } else if (targetDirection === 2) {
         targetPosition += targetSpeed * timeDiff;
 
-        if (targetPosition > (mainWidth-40)) {
+        if (targetPosition > (mainWidth - targetWidth)) {
           // Change direction if edge of container is reached
           targetDirection = 1
-        } else {
-          targetEl.style.transform = `translateX(${targetPosition}px)`;
+          targetPosition = mainWidth - targetWidth;
         }
       }
+
+      targetEl.style.transform = `translateX(${targetPosition}px)`;
 
       // Randomly change direction sometimes
       if (Math.floor(Math.random() * targetMoveRandomness / timeDiff) === 1) {
@@ -646,8 +652,8 @@
         gunEl.style.transform = `translateX(${gunPosition}px)`;
       } else if (gunMovingRight) {
         gunPosition += gunSpeed * timeDiff;
-        if (gunPosition > (mainWidth-40)) {
-          gunPosition = (mainWidth-40);
+        if (gunPosition > (mainWidth - gunWidth)) {
+          gunPosition = (mainWidth - gunWidth);
         }
         gunEl.style.transform = `translateX(${gunPosition}px)`;
       }
@@ -922,7 +928,7 @@
 
     const spawnGun = (timeInvulnerable) => {
       if (gameActive) {
-        gunPosition = (mainWidth/2) - 20;;
+        gunPosition = (mainWidth / 2) - (gunWidth / 2);
         gunHeat = 0;
         gunDisabled = false;
         gunEl.style.display = "block";
