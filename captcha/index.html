@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Captcha!</title>
+</head>
+
+<body>
+  <main class="main">
+    <h1>Humans-only form!</h1>
+    <form>
+      <label for="firstName">First human name:</label><br>
+      <input id="firstName" name="firstName" type="text"><br>
+      <label for="lastName">Last human name:</label><br>
+      <input id="lastName" name="lastName" type="text">
+      <div class="captcha">
+        <label for="captchaCheckbox">I am not a robot!</label>
+        <input type="checkbox" name="captchaCheckbox" id="captchaCheckbox">
+        <input type="hidden" name="supersecretInput" id="supersecretInput">
+        <div id="captchaTest" class="captcha__test hidden">
+          Please straighten out this paintings to prove your humanness:
+          <div class="captcha__test__paintings">
+            <div id="painting1" class="painting" style="transform: rotate(9deg);">
+              <img src="images/1.jpg" alt="">
+            </div>
+            <div id="painting2" class="painting painting--2" style="transform: rotate(-8deg);">
+              <img src="images/2.jpg" alt="">
+            </div>
+            <div id="painting3" class="painting painting--3" style="transform: rotate(5deg);">
+              <img src="images/3.jpg" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="submit">Submit form</button>
+      <div id="captchaWarning1" class="hidden" style="color: red;">
+        Robots not allowed, please check the box you lazy bum.
+      </div>
+      <div id="captchaWarning2" class="hidden" style="color: red;">
+        The paintings are not all straight, please do better!!!
+      </div>
+    </form>
+    <div id="submitMessage" class="hidden" style="color: green;">
+      Thank you human, your form has been submitted.
+    </div>
+  </main>
+  <style>
+    body {
+      margin: 30px;
+      padding: 0;
+      position: relative;
+      font-family: system-ui;
+      font-size: 14px;
+      background: #fcf8f3;
+      color: #11133c;
+    }
+
+    h1 {
+      display: block;
+      padding: 0 0 10px 0;
+      margin: 0 0 20px 0;
+      border-bottom: 2px solid #11133c;
+    }
+
+    button {
+      background: #11133c;
+      color: white;
+      border-radius: 5px;
+      padding: 5px 10px;
+      border: 0;
+      cursor: pointer;
+      transition: background-color ease 200ms;
+    }
+
+    button:hover,
+    button:focus-visible {
+      background: #2a2e78;
+    }
+
+    .captcha {
+      margin: 15px 0;
+    }
+
+    .captcha__test {
+      margin-top: 15px;
+    }
+
+    .captcha__test__paintings {
+      display: flex;
+      gap: 30px;
+      margin-top: 15px;
+      padding: 30px;
+      background: antiquewhite;
+      border-radius: 5px;
+    }
+
+    .painting {
+      height: 120px;
+      width: 80px;
+      background: blue;
+      border: 10px solid rgb(148 66 0);
+      transform-origin: top center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .painting img {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .painting--2 {
+      height: 80px;
+      width: 80px;
+    }
+
+    .painting--3 {
+      height: 100px;
+      width: 120px;
+    }
+
+    .painting--straight {
+      box-shadow: 0px 0px 5px 2px green;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+
+  <script>
+    // Html elements
+    const formEl = document.getElementsByTagName("form")[0];
+    const captchaCheckboxEl = document.getElementById("captchaCheckbox");
+    const captchaTestEl = document.getElementById("captchaTest");
+    const supersecretInputEl = document.getElementById("supersecretInput");
+    const captchaWarning1El = document.getElementById("captchaWarning1");
+    const captchaWarning2El = document.getElementById("captchaWarning2");
+    const submitMessageEl = document.getElementById("submitMessage");
+
+    // Input events
+    formEl.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!captchaCheckboxEl.checked) {
+        captchaWarning1El.classList.remove("hidden");
+        return;
+      }
+
+      if (elementIsStraight1 && elementIsStraight2 && elementIsStraight3) {
+        formEl.classList.add("hidden");
+        captchaWarning1El.classList.add("hidden");
+        captchaWarning2El.classList.add("hidden");
+
+        // Set some value to validate on server side when posting form
+        supersecretInputEl.value = "totallynotarobot";
+
+        submitMessageEl.classList.remove("hidden");
+      } else {
+        captchaWarning2El.classList.remove("hidden");
+      }
+    });
+
+    captchaCheckboxEl.addEventListener("change", (event) => {
+      if (event.target.checked) {
+        captchaTestEl.classList.remove("hidden");
+        captchaWarning1El.classList.add("hidden");
+      } else {
+        captchaTestEl.classList.add("hidden");
+        captchaWarning2El.classList.add("hidden");
+      }
+    });
+
+    // Mouse drag to rotate
+    let isDragging = false;
+    let startX;
+    let totalDistance = 0;
+    const draggableElement1 = document.getElementById('painting1');
+    const draggableElement2 = document.getElementById('painting2');
+    const draggableElement3 = document.getElementById('painting3');
+    let elementRotation1 = 9;
+    let elementRotation2 = -8;
+    let elementRotation3 = 5;
+    let activeElement;
+    let elementIsStraight1 = false;
+    let elementIsStraight2 = false;
+    let elementIsStraight3 = false;
+
+    draggableElement1.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      activeElement = "1";
+      e.preventDefault();
+    });
+
+    draggableElement2.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      activeElement = "2";
+      e.preventDefault();
+    });
+
+    draggableElement3.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      activeElement = "3";
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        // Calculate the distance moved in this specific move event
+        const deltaX = e.clientX - startX;
+        totalDistance += deltaX;
+
+        // Update startX for the next mousemove event
+        startX = e.clientX;
+
+        // Rotate based on movement
+        if (activeElement === "1") {
+          const rotation = elementRotation1 - Math.round(totalDistance);
+          if (rotation < 2 && rotation > -2) {
+            draggableElement1.classList.add("painting--straight");
+            elementIsStraight1 = true;
+          } else {
+            draggableElement1.classList.remove("painting--straight");
+            elementIsStraight1 = false;
+          }
+          draggableElement1.style.transform = `rotate(${rotation}deg)`;
+        }
+        if (activeElement === "2") {
+          const rotation = elementRotation2 - Math.round(totalDistance);
+          if (rotation < 2 && rotation > -2) {
+            draggableElement2.classList.add("painting--straight");
+            elementIsStraight2 = true;
+          } else {
+            draggableElement2.classList.remove("painting--straight");
+            elementIsStraight2 = false;
+          }
+          draggableElement2.style.transform = `rotate(${rotation}deg)`;
+        }
+        if (activeElement === "3") {
+          const rotation = elementRotation3 - Math.round(totalDistance);
+          if (rotation < 2 && rotation > -2) {
+            draggableElement3.classList.add("painting--straight");
+            elementIsStraight3 = true;
+          } else {
+            draggableElement3.classList.remove("painting--straight");
+            elementIsStraight3 = false;
+          }
+          draggableElement3.style.transform = `rotate(${rotation}deg)`;
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        if (activeElement === "1") {
+          elementRotation1 = elementRotation1 - Math.round(totalDistance);
+        }
+        if (activeElement === "2") {
+          elementRotation2 = elementRotation2 - Math.round(totalDistance);
+        }
+        if (activeElement === "3") {
+          elementRotation3 = elementRotation3 - Math.round(totalDistance);
+        }
+
+        isDragging = false;
+        totalDistance = 0;
+      }
+    });
+  </script>
+</body>
+
+</html>
