@@ -863,6 +863,7 @@
       explosion3.style.left = (targetPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
+      if (supportsVibration) navigator.vibrate(0);
       if (supportsVibration) navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
 
       setTimeout(() => {
@@ -910,6 +911,7 @@
       explosion3.style.left = (gunPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
+      if (supportsVibration) navigator.vibrate(0);
       if (supportsVibration) navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
 
       setTimeout(() => {
