@@ -688,6 +688,8 @@
           bullet.style.left = (gunPosition + 18.5) + "px";
           mainEl.appendChild(bullet);
 
+          navigator.vibrate(50);
+
           // Start an intersection observer to handle bullets going off screen
           let options = {
             root: mainEl,
@@ -855,7 +857,7 @@
       explosion3.style.left = (targetPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
-      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 250,]);
+      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
 
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
@@ -902,7 +904,7 @@
       explosion3.style.left = (gunPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
-      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 250,]);
+      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
 
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
