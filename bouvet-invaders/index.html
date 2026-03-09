@@ -855,6 +855,8 @@
       explosion3.style.left = (targetPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
+      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 250,]);
+
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
        }, 75);
@@ -899,6 +901,8 @@
       explosion3.style.bottom = "-7px";
       explosion3.style.left = (gunPosition + 18) + "px";
       mainEl.appendChild(explosion3);
+
+      navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 250,]);
 
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
