@@ -393,7 +393,8 @@
     timeStart,
     timePrevious,
     bombs = [],
-    bullets = [];
+    bullets = [],
+    isVibrating;
 
     // Functions
     const resetVariables = () => {
@@ -418,6 +419,7 @@
       lifeCount = 3;
       timeStart = 0;
       timePrevious = 0;
+      isVibrating = false;
     };
 
     const resetScoreboard = () => {
@@ -601,6 +603,38 @@
       }, 2000);
     };
 
+    const vibrate = (type) => {
+      // Target/gun destroyed events take precedence, so other smaller vibration effects are blocked/cancelled when those occur.
+      if (supportsVibration) {
+        switch (type) {
+          case "bombExploded":
+            if (!isVibrating) {
+              navigator.vibrate([20, 5, 20]);
+            }
+            break;
+          case "bulletFired":
+            if (!isVibrating) {
+              navigator.vibrate(50);
+            }
+            break;
+          case "targetDestroyed":
+            isVibrating = true;
+            setTimeout(() => { isVibrating = false; }, 650);
+            navigator.vibrate(0);
+            navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
+            break;
+          case "gunDestroyed":
+            isVibrating = true;
+            setTimeout(() => { isVibrating = false; }, 650);
+            navigator.vibrate(0);
+            navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
     const moveTarget = (timeDiff) => {
       if (targetDirection === 0) {
         return;
@@ -692,7 +726,7 @@
           bullet.style.left = (gunPosition + 18.5) + "px";
           mainEl.appendChild(bullet);
 
-          if (supportsVibration) navigator.vibrate(50);
+          vibrate("bulletFired");
 
           // Start an intersection observer to handle bullets going off screen
           let options = {
@@ -802,7 +836,7 @@
           explosion1.style.left = bomb.element.style.left;
           mainEl.appendChild(explosion1);
 
-          if (supportsVibration) navigator.vibrate([20, 5, 20]);
+          vibrate("bombExploded");
 
           setTimeout(() => {
             explosion1.style.transform = "scale(1 , 1)";
@@ -863,8 +897,7 @@
       explosion3.style.left = (targetPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
-      if (supportsVibration) navigator.vibrate(0);
-      if (supportsVibration) navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
+      vibrate("targetDestroyed");
 
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
@@ -911,8 +944,7 @@
       explosion3.style.left = (gunPosition + 18) + "px";
       mainEl.appendChild(explosion3);
 
-      if (supportsVibration) navigator.vibrate(0);
-      if (supportsVibration) navigator.vibrate([30, 5, 30, 10, 30, 5, 30, 10, 100, 20, 100, 30, 250]);
+      vibrate()
 
       setTimeout(() => {
         explosion2.style.transform = "scale(1, 1)";
