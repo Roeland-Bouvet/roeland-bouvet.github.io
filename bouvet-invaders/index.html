@@ -296,7 +296,7 @@
     .controls .button {
       flex: 1;
       text-align: center;
-      line-height: 80px;
+      line-height: 0;
       border: 1px solid white;
       margin: 15px 0;
       font-size: 28px;
@@ -304,6 +304,9 @@
       -webkit-user-select: none; /* Safari */
       -ms-user-select: none; /* IE 10 and IE 11 */
       user-select: none; /* Standard syntax */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .controls .button--center {
@@ -797,6 +800,8 @@
           explosion1.style.top = bomb.translateY + "px";
           explosion1.style.left = bomb.element.style.left;
           mainEl.appendChild(explosion1);
+
+          navigator.vibrate([20, 5, 20]);
 
           setTimeout(() => {
             explosion1.style.transform = "scale(1 , 1)";
