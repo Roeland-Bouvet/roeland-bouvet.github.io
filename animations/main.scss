@@ -1,0 +1,217 @@
+html {
+    background: black;
+}
+
+.spinner {
+  margin: 50px auto;
+  height: 500px;
+  width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative;
+  background: skyblue;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid white;
+
+  .clouds {
+    position: absolute;
+    top: 5px;
+    right: -20px;
+    animation: clouds 15s linear infinite;
+
+    .fluff1 {
+      position: absolute;
+      top: 28px;
+      left: 88px;
+      height: 50px;
+      width: 50px;
+      border-radius: 100%;
+      background: white;
+    }
+
+    .fluff2 {
+      position: absolute;
+      top: 5px;
+      left: 20px;
+      height: 83px;
+      width: 100px;
+      border-radius: 100%;
+      background: white;
+    }
+
+    .fluff3 {
+      position: absolute;
+      top: 18px;
+      left: -11px;
+      height: 63px;
+      width: 75px;
+      border-radius: 100%;
+      background: white;
+    }
+  }
+
+  .background-far {
+    position: absolute;
+    bottom: 20px;
+    right: -20px;
+    animation: background-far 11s linear infinite;
+
+    .building1 {
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      height: 200px;
+      width: 200px;
+    }
+
+    .building2 {
+      position: absolute;
+      bottom: 0;
+      left: 240px;
+      height: 300px;
+      width: 300px;
+    }
+
+    .sign {
+      position: absolute;
+      bottom: 310px;
+      left: 320px;
+      height: 50px;
+      width: 140px;
+      line-height: 50px;
+      text-align: center;
+      background: white;
+      color: black;
+      border-radius: 3px;
+      font-weight: 500;
+      font-family: sans-serif;
+      border: 2px solid gray;
+
+      .post1 {
+        position: absolute;
+        bottom: -12px;
+        left: 5px;
+        width: 4px;
+        height: 10px;
+        background: black;
+      }
+
+      .post2 {
+        position: absolute;
+        bottom: -12px;
+        right: 5px;
+        width: 4px;
+        height: 10px;
+        background: black;
+      }
+    }
+  }
+
+  .background-near {
+    position: absolute;
+    bottom: 20px;
+    right: -20px;
+    animation: background-near 5s linear infinite;
+
+    .tree1 {
+      position: absolute;
+      bottom: -5px;
+      left: 20px;
+      height: 150px;
+      width: 150px;
+    }
+
+    .tree2 {
+      position: absolute;
+      bottom: -5px;
+      left: 70px;
+      height: 220px;
+      width: 220px;
+    }
+
+    .tree3 {
+      position: absolute;
+      bottom: -5px;
+      left: 150px;
+      height: 180px;
+      width: 180px;
+    }
+  }
+
+  .foreground {
+    position: absolute;
+    bottom: 20px;
+    right: -20px;
+    animation: foreground 3s linear infinite;
+    z-index: 4;
+
+    .bush1 {
+      position: absolute;
+      bottom: -50px;
+      left: 20px;
+      height: 180px;
+      width: 180px;
+    }
+  }
+
+  .grass {
+    position: absolute;
+    background: green;
+    height: 20px;
+    width: 100%;
+    bottom: 0;
+  }
+
+  .coin {
+    position: absolute;
+    top: 0;
+    left: 206px;
+    animation: drop 1s linear infinite;
+    z-index: 10;
+  }
+
+  .piggybank {
+    position: absolute;
+    bottom: 0;
+    animation: hop 1s linear infinite;
+    z-index: 3;
+  }
+
+  @keyframes foreground {
+    0% {transform: translateX(0px);}
+    100% {transform: translateX(-1000px);}
+  }
+
+  @keyframes background-near {
+    0% {transform: translateX(0px);}
+    100% {transform: translateX(-1000px);}
+  }
+
+  @keyframes background-far {
+    0% {transform: translateX(0px);}
+    100% {transform: translateX(-1200px);}
+  }
+
+  @keyframes clouds {
+    0% {transform: translateX(0px);}
+    100% {transform: translateX(-650px);}
+  }
+
+  @keyframes drop {
+    0% {transform: translateY(0px) rotateY(0deg);}
+    25% {transform: translateY(73px) rotateY(90deg);}
+    50% {transform: translateY(147px) rotateY(180deg);}
+    75% {transform: translateY(220px) rotateY(270deg);}
+    100% {transform: translateY(294px) rotateY(360deg);}
+  }
+
+  @keyframes hop {
+    0% {transform: translateY(0px) rotateZ(0deg);}
+    25% {transform: translateY(-20px) rotateZ(-10deg);}
+    50% {transform: translateY(-40px) rotateZ(-5deg);}
+    75% {transform: translateY(-20px) rotateZ(5deg);}
+    100% {transform: translateY(0px) rotateZ(0deg);}
+  }
+}
