@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wave</title>
+  </head>
+  <body>
+    <div id="waveCanvas" class="wave-canvas">
+    </div>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-image: url("background.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+      }
+
+      .wave-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 99999;
+        overflow: hidden;
+      }
+
+      .wave {
+        position: absolute;
+        background-image: url("wave.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        aspect-ratio: 1536 / 876;
+        height: auto;
+      }
+
+      .boat {
+        position: absolute;
+        background-image: url("boat.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        aspect-ratio: 416 / 234;
+        width: 150px;
+        height: auto;
+      }
+    </style>
+
+    <script>
+      // Variables
+      let wavesMax = 20; // max elements at the same time
+      let wavesSpawnrate = 3000; // ms between spawning new elements
+      let boatsMax = 5; // max elements at the same time
+      let boatsSpawnrate = 10000; // ms between spawning new elements
+      const speeds = [0.05, 0.06, 0.07]; // px/ms
+      const sizes = ["600px", "800px", "1000px", "1200px", "1500px", "1800px"]; // sizes in width (will auto scale height by 1536*1024)
+      const bottomWavePositions = ["-50px", "-40px", "-30px", "-20px", "-1px"];
+      const bottomPositions = ["10px", "15px", "20px", "30px"];
+      const waveOffsets = [0, 5, 10];
+      const waveAmplitudes = [5, 8, 10];
+      const waveFrequencies = [80, 90, 100];
+      const boatOffsets = [0, 5, 10];
+      const boatAmplitudes = [10, 20, 30];
+      const boatFrequencies = [80, 90, 100];
+
+      let animate = false;
+      let timeStart = 0
+      let timePrevious = 0;
+      let timeWaveAdded = 0;
+      let timeBoatAdded = 0;
+      let waves = [];
+      let boats = [];
+
+      // Html elements
+      const waveCanvasEl = document.getElementById("waveCanvas");
+
+      // Functions
+      const getRandom = (array) => {
+        return array[Math.floor(Math.random() * array.length)];
+      };
+
+      const createElement = (size, bottom, cssClass) => {
+        const element = document.createElement("div");
+        element.classList.add(cssClass);
+        element.style.bottom = bottom;
+        element.style.width = size;
+        element.style.left = `-${size}`;
+        waveCanvasEl.appendChild(element);
+
+        return element;
+      }
+
+      const animateSnow = (timeCurrent) => {
+        // requestAnimationFrame repeats at monitor refresh rate
+        // Use timestamps to control the speed of animation
+        if (timeStart === 0) {
+          timeStart = timeCurrent;
+        }
+
+        // Possible for multiple requestAnimationFrame callbacks to queue up on one frame
+        // Only animate once per frame
+        if (timePrevious !== timeCurrent) {
+          const waveCanvasWidth = waveCanvasEl.offsetWidth;
+
+          // Add new wave until maximum
+          if ((timeCurrent - timeWaveAdded > wavesSpawnrate) && (waves.length < wavesMax)) {
+            const size = getRandom(sizes);
+            const bottom = getRandom(bottomWavePositions);
+
+            waves.push({
+              timeCreated: timeCurrent,
+              element: createElement(size, bottom, "wave"),
+              speed: getRandom(speeds),
+              size: Number.parseInt(size.replace("px", "")),
+              waveOffset: getRandom(waveOffsets),
+              waveAmplitude: getRandom(waveAmplitudes),
+              waveFrequency: getRandom(waveFrequencies),
+              delete: false
+            });
+            timeWaveAdded = timeCurrent;
+          }
+
+          // Add new boat until maximum
+          if ((timeCurrent - timeBoatAdded > boatsSpawnrate) && (boats.length < boatsMax)) {
+            const size = "150px";
+            const bottom = getRandom(bottomPositions);
+
+            boats.push({
+              timeCreated: timeCurrent,
+              element: createElement(size, bottom, "boat"),
+              speed: getRandom(speeds),
+              size: Number.parseInt(size.replace("px", "")),
+              waveOffset: getRandom(boatOffsets),
+              waveAmplitude: getRandom(boatAmplitudes),
+              waveFrequency: getRandom(boatFrequencies),
+              delete: false
+            });
+            timeBoatAdded = timeCurrent;
+          }
+
+          // Update all wave positions
+          waves.forEach((wave) => {
+            const positionX = wave.speed * (timeCurrent - wave.timeCreated);
+
+            if (positionX < (waveCanvasWidth + wave.size)) {
+              const positionY = wave.waveAmplitude * Math.sin(positionX / wave.waveFrequency + wave.waveOffset);
+              wave.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
+            } else {
+              wave.delete = true;
+              wave.element.remove();
+            }
+          });
+
+          // Update all boat positions
+          boats.forEach((boat) => {
+            const positionX = boat.speed * (timeCurrent - boat.timeCreated);
+
+            if (positionX < (waveCanvasWidth + boat.size)) {
+              const positionY = boat.waveAmplitude * Math.sin(positionX / boat.waveFrequency + boat.waveOffset);
+              boat.element.style.transform = `translate(${positionX}px, ${positionY}px)`;
+            } else {
+              boat.delete = true;
+              boat.element.remove();
+            }
+          });
+
+          // Delete removed waves from array
+          waves = waves.filter((wave) => !wave.delete);
+
+          // Delete removed boats from array
+          boats = boats.filter((boat) => !boat.delete);
+        }
+
+        if (animate) {
+          // Keep animation going
+          timePrevious = timeCurrent;
+          window.requestAnimationFrame(animateSnow);
+        } else {
+          // Remove all waves and reset variables
+          waves.forEach((wave) => {
+            wave.element.remove();
+          });
+          waves = [];
+
+          // Remove all boats and reset variables
+          boats.forEach((boats) => {
+            boats.element.remove();
+          });
+          boats = [];
+
+          // Reset variables
+          timeStart = 0;
+          timePrevious = 0;
+          timeWaveAdded = 0;
+          timeBoatAdded = 0;
+        }
+      }
+
+      const initSnow = () => {
+        animate = true;
+        window.requestAnimationFrame(animateSnow);
+      };
+
+      if (document.readyState !== "loading") {
+        initSnow();
+      } else {
+        window.addEventListener("DOMContentLoaded", () => {
+          initSnow();
+        });
+      }
+    </script>
+  </body>
+</html>
